@@ -1,30 +1,33 @@
 import os
 import html
+import json
 import asyncio
 import pandas as pd
 import FinanceDataReader as fdr
 import google.generativeai as genai
+import gspread
 from dotenv import load_dotenv
 from telegram import Bot
 from datetime import datetime, timedelta
 
-# 1. 환경 설정 및 마스터 키 로드
+# 1. 환경 설정
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-# 2. 어제 확정한 최적의 모델 유지
 model = genai.GenerativeModel('gemini-2.5-flash')
 
-# 3. SCM 마스터 데이터: 개별 종목과 '산업군 ETF' 1:1 매핑
+# 구글 시트 주소
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1yApGhO57y_sWM30FbWWV44R2a3LhUomQvH7WloZTDmw/edit"
+
+# 2. 마스터 데이터
 MY_PORTFOLIO = {
     "삼성전자":   ("005930", "091160", "KODEX 반도체"),
     "SK하이닉스": ("000660", "091160", "KODEX 반도체"),
     "현대차":     ("005380", "091180", "KODEX 자동차")
 }
 
-# 4. 기술적 지표 일괄 연산 모듈
+# 3. 기술적 지표 일괄 연산
 def calculate_indicators(df):
     delta = df['Close'].diff()
     gain  = delta.where(delta > 0, 0)
@@ -42,7 +45,7 @@ def calculate_indicators(df):
     df['BB_Width'] = (df['BB_Upper'] - df['BB_Lower']) / df['MA20']
     return df
 
-# 5. 텔레그램 분할 전송 방어 로직 (태그 파손 방지)
+# 4. 텔레그램 분할 전송
 def split_by_lines(text, max_len=4000):
     chunks, current = [], ""
     for line in text.split("\n"):
@@ -59,11 +62,11 @@ async def send_message_safe(bot, text):
     for chunk in split_by_lines(text):
         await bot.send_message(chat_id=CHAT_ID, text=chunk, parse_mode='HTML')
 
-# 6. 핵심 브리핑 파이프라인
+# 5. 핵심 브리핑 파이프라인
 async def send_briefing():
     bot = Bot(token=TELEGRAM_TOKEN)
     today_str   = datetime.today().strftime('%Y-%m-%d')
-    full_report = f"📅 <b>{today_str} 시장 자동 분석 리포트 (V3.4)</b>\n" + "━"*25 + "\n"
+    full_report = f"📅 <b>{today_str} 장 마감 자동 분석 리포트 (V4.1)</b>\n" + "━"*25 + "\n"
     log_data    = []
     
     start_date  = (datetime.today() - timedelta(days=150)).strftime('%Y-%m-%d')
@@ -124,32 +127,46 @@ async def send_briefing():
             full_report += f"  • 리스크: {vol_msg}\n"
             full_report += f"  • 💡 AI 코멘트: {ai_comment}\n"
 
-            log_data.append({
-                "Date": today_str,        "Stock": stock_name,
-                "Close": c_price,         "RSI": round(rsi_val, 2),
-                "BB_Width": round(bb_width, 4),
-                "Volatility_Warn": volatility_warn,
-                "Sector_Up": sector_trend_ok, "Buy_Signal": buy_signal
-            })
+            log_data.append([
+                today_str, stock_name, c_price, round(rsi_val, 2),
+                round(bb_width, 4), str(volatility_warn),
+                str(sector_trend_ok), str(buy_signal)
+            ])
 
         except Exception as e:
             full_report += f"\n❌ <b>{stock_name}</b>: 분석 실패 ({str(e)})\n"
 
-        # ⭐ 핵심 수정: 성공/실패 무관하게 무조건 3초 대기하여 분당 트래픽(RPM) 우회 차단
         finally:
             await asyncio.sleep(3)
 
-    # 7. 전송 및 임시 로깅
+    # 6. 전송 및 구글 시트 영구 로깅
     await send_message_safe(bot, full_report)
 
-    if log_data:
-        df_log   = pd.DataFrame(log_data)
-        log_file = "trade_log.csv"
-        df_log.to_csv(log_file, mode='a', header=not os.path.exists(log_file),
-                      index=False, encoding='utf-8-sig')
-        print("✅ 거래 로그(trade_log.csv) 임시 기록 완료!")
+    creds_json = os.getenv("GOOGLE_SHEETS_CREDENTIALS")
+    if creds_json and log_data:
+        try:
+            creds_dict = json.loads(creds_json)
+            client = gspread.service_account_from_dict(creds_dict)
+            doc = client.open_by_url(SHEET_URL)
+            worksheet = doc.worksheet("Trade_Log")
+            
+            # 헤더 중복 방지 (A1 셀 명시적 확인)
+            first_cell = worksheet.acell('A1').value
+            if not first_cell or str(first_cell).strip() == "":
+                headers = ["Date", "Stock", "Close", "RSI", "BB_Width", "Volatility_Warn", "Sector_Up", "Buy_Signal"]
+                worksheet.append_row(headers)
+                
+            # 데이터 적재
+            worksheet.append_rows(log_data)
+            print("✅ 구글 시트(Trade_Log) 영구 기록 완료!")
+            
+        except Exception as e:
+            err_msg = f"❌ 구글 시트 통신/기록 실패: {e}"
+            print(err_msg)
+            # 장애 발생 시 텔레그램으로 관리자 즉시 호출 (안돈 시스템)
+            await bot.send_message(chat_id=CHAT_ID, text=err_msg)
 
-    print("✅ V3.4 마스터 데일리 리포트 전송 완료!")
+    print("✅ V4.1 데이터베이스 연동 및 결산 리포트 전송 완료!")
 
 if __name__ == "__main__":
     asyncio.run(send_briefing())
