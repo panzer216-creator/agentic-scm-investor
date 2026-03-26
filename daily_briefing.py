@@ -40,7 +40,7 @@ def calculate_indicators(df):
     df['BB_Width'] = (df['BB_Upper'] - df['BB_Lower']) / df['MA20']
     return df
 
-# 4. 텔레그램 분할 전송 방어 로직 (태그 파손 방지를 위한 줄 단위 분할)
+# 4. 텔레그램 분할 전송 방어 로직
 def split_by_lines(text, max_len=4000):
     chunks, current = [], ""
     for line in text.split("\n"):
@@ -61,10 +61,9 @@ async def send_message_safe(bot, text):
 async def send_briefing():
     bot = Bot(token=TELEGRAM_TOKEN)
     today_str   = datetime.today().strftime('%Y-%m-%d')
-    full_report = f"📅 <b>{today_str} 시장 자동 분석 리포트 (V3.2)</b>\n" + "━"*25 + "\n"
+    full_report = f"📅 <b>{today_str} 시장 자동 분석 리포트 (V3.3)</b>\n" + "━"*25 + "\n"
     log_data    = []
     
-    # 60일선 계산을 위해 150일치 데이터 넉넉히 조달
     start_date  = (datetime.today() - timedelta(days=150)).strftime('%Y-%m-%d')
 
     for stock_name, (stock_code, sector_code, sector_name) in MY_PORTFOLIO.items():
@@ -140,10 +139,13 @@ async def send_briefing():
                 "Sector_Up": sector_trend_ok, "Buy_Signal": buy_signal
             })
 
+            # (10) API 과부하 방지 (Takt Time 3초 지연)
+            await asyncio.sleep(3)
+
         except Exception as e:
             full_report += f"\n❌ <b>{stock_name}</b>: 분석 실패 ({str(e)})\n"
 
-    # (10) 전송 및 로깅
+    # (11) 전송 및 로깅
     await send_message_safe(bot, full_report)
 
     if log_data:
@@ -153,7 +155,7 @@ async def send_briefing():
                       index=False, encoding='utf-8-sig')
         print("✅ 거래 로그(trade_log.csv) 임시 기록 완료!")
 
-    print("✅ V3.2 마스터 데일리 리포트 전송 완료!")
+    print("✅ V3.3 마스터 데일리 리포트 전송 완료!")
 
 if __name__ == "__main__":
     asyncio.run(send_briefing())
