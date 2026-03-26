@@ -13,16 +13,18 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+# 2. 어제 확정한 최적의 모델 유지
 model = genai.GenerativeModel('gemini-2.5-flash')
 
-# 2. SCM 마스터 데이터: 개별 종목과 '산업군 ETF' 1:1 매핑
+# 3. SCM 마스터 데이터: 개별 종목과 '산업군 ETF' 1:1 매핑
 MY_PORTFOLIO = {
     "삼성전자":   ("005930", "091160", "KODEX 반도체"),
     "SK하이닉스": ("000660", "091160", "KODEX 반도체"),
     "현대차":     ("005380", "091180", "KODEX 자동차")
 }
 
-# 3. 기술적 지표 일괄 연산 모듈
+# 4. 기술적 지표 일괄 연산 모듈
 def calculate_indicators(df):
     delta = df['Close'].diff()
     gain  = delta.where(delta > 0, 0)
@@ -40,7 +42,7 @@ def calculate_indicators(df):
     df['BB_Width'] = (df['BB_Upper'] - df['BB_Lower']) / df['MA20']
     return df
 
-# 4. 텔레그램 분할 전송 방어 로직
+# 5. 텔레그램 분할 전송 방어 로직 (태그 파손 방지)
 def split_by_lines(text, max_len=4000):
     chunks, current = [], ""
     for line in text.split("\n"):
@@ -57,11 +59,11 @@ async def send_message_safe(bot, text):
     for chunk in split_by_lines(text):
         await bot.send_message(chat_id=CHAT_ID, text=chunk, parse_mode='HTML')
 
-# 5. 핵심 브리핑 파이프라인
+# 6. 핵심 브리핑 파이프라인
 async def send_briefing():
     bot = Bot(token=TELEGRAM_TOKEN)
     today_str   = datetime.today().strftime('%Y-%m-%d')
-    full_report = f"📅 <b>{today_str} 시장 자동 분석 리포트 (V3.3)</b>\n" + "━"*25 + "\n"
+    full_report = f"📅 <b>{today_str} 시장 자동 분석 리포트 (V3.4)</b>\n" + "━"*25 + "\n"
     log_data    = []
     
     start_date  = (datetime.today() - timedelta(days=150)).strftime('%Y-%m-%d')
@@ -69,14 +71,12 @@ async def send_briefing():
     for stock_name, (stock_code, sector_code, sector_name) in MY_PORTFOLIO.items():
         print(f"🔍 [{stock_name}] 분석 중...")
         try:
-            # (1) 데이터 조달
             df_stock  = fdr.DataReader(stock_code,  start_date).copy()
             df_sector = fdr.DataReader(sector_code, start_date).copy()
 
             if len(df_stock) < 65 or len(df_sector) < 65:
                 raise ValueError("지표 연산용 데이터 부족")
 
-            # (2) 지표 가공
             df_stock  = calculate_indicators(df_stock)
             df_sector['MA60'] = df_sector['Close'].rolling(window=60).mean()
 
@@ -84,7 +84,6 @@ async def send_briefing():
             prev_s   = df_stock.iloc[-2]
             curr_sec = df_sector.iloc[-1]
 
-            # (3) 결함 방어
             if pd.isna(curr_s['Close']) or pd.isna(prev_s['Close']):
                 raise ValueError("종가 데이터 누락 (NaN)")
             for col in ['RSI', 'MA60', 'BB_Width']:
@@ -93,14 +92,12 @@ async def send_briefing():
             if pd.isna(curr_sec['MA60']):
                 raise ValueError("섹터 ETF MA60 연산 실패 (NaN)")
 
-            # (4) 정밀도 향상
             prev_price = float(prev_s['Close'])
             c_percent  = ((float(curr_s['Close']) - prev_price) / prev_price) * 100
             c_price    = int(curr_s['Close'])
             rsi_val    = curr_s['RSI']
             bb_width   = curr_s['BB_Width']
 
-            # (5) SCM 논리 검증
             sector_trend_ok = curr_sec['Close'] > curr_sec['MA60']
             stock_trend_ok  = c_price > curr_s['MA60']
             stock_rsi_ok    = rsi_val < 40
@@ -108,12 +105,10 @@ async def send_briefing():
             buy_signal      = sector_trend_ok and stock_trend_ok and stock_rsi_ok
             volatility_warn = bb_width > 0.20
 
-            # (6) 상태 메시지 구성
             status_msg = "🟢 <b>매수 조건 충족 (최적 발주점)</b>" if buy_signal else "⏳ 관망 (조건 미달)"
             vol_msg    = "⚠️ <b>[변동성 경고] 비중 50% 축소 권장</b>" if volatility_warn else "✅ 안정적 변동성"
             sector_msg = "상승 추세" if sector_trend_ok else "하락 추세 (보수적 접근)"
 
-            # (7) AI 호출 및 HTML 이스케이프 방어
             prompt = f"""
             당신은 펀드매니저입니다. [{stock_name}] 데이터: 현재가 {c_price:,.0f}원({c_percent:+.2f}%), RSI {rsi_val:.1f}, 60일선 돌파 여부: {stock_trend_ok}.
             소속 산업군({sector_name}) 상태: {sector_msg}.
@@ -122,7 +117,6 @@ async def send_briefing():
             response   = await asyncio.to_thread(model.generate_content, prompt)
             ai_comment = html.escape(response.text.strip())
 
-            # (8) 리포트 최종 조립
             full_report += f"\n📌 <b>{stock_name}</b> (산업군: {sector_name} - {sector_msg})\n"
             full_report += f"  • 현재가: {c_price:,.0f}원 ({c_percent:+.2f}%)\n"
             full_report += f"  • RSI(14): {rsi_val:.1f} | 60MA 상회: {'O' if stock_trend_ok else 'X'}\n"
@@ -130,7 +124,6 @@ async def send_briefing():
             full_report += f"  • 리스크: {vol_msg}\n"
             full_report += f"  • 💡 AI 코멘트: {ai_comment}\n"
 
-            # (9) 확장된 로깅 데이터 수집
             log_data.append({
                 "Date": today_str,        "Stock": stock_name,
                 "Close": c_price,         "RSI": round(rsi_val, 2),
@@ -139,13 +132,14 @@ async def send_briefing():
                 "Sector_Up": sector_trend_ok, "Buy_Signal": buy_signal
             })
 
-            # (10) API 과부하 방지 (Takt Time 3초 지연)
-            await asyncio.sleep(3)
-
         except Exception as e:
             full_report += f"\n❌ <b>{stock_name}</b>: 분석 실패 ({str(e)})\n"
 
-    # (11) 전송 및 로깅
+        # ⭐ 핵심 수정: 성공/실패 무관하게 무조건 3초 대기하여 분당 트래픽(RPM) 우회 차단
+        finally:
+            await asyncio.sleep(3)
+
+    # 7. 전송 및 임시 로깅
     await send_message_safe(bot, full_report)
 
     if log_data:
@@ -155,7 +149,7 @@ async def send_briefing():
                       index=False, encoding='utf-8-sig')
         print("✅ 거래 로그(trade_log.csv) 임시 기록 완료!")
 
-    print("✅ V3.3 마스터 데일리 리포트 전송 완료!")
+    print("✅ V3.4 마스터 데일리 리포트 전송 완료!")
 
 if __name__ == "__main__":
     asyncio.run(send_briefing())
