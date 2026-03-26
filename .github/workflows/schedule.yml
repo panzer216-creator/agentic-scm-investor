@@ -2,14 +2,14 @@ name: Daily Stock Briefing
 
 on:
   schedule:
-    # 한국 시간(KST) 매일 아침 8시 30분에 실행 (UTC 기준 전날 밤 11시 30분)
-    # 0-4는 일요일~목요일(UTC)을 의미하며, 한국 시간으로는 월요일~금요일 아침이 됩니다.
-    - cron: '30 23 * * 0-4'
-  workflow_dispatch: # 버튼을 눌러 수동으로 즉시 실행할 수 있게 해주는 옵션
+    # 한국 시간(KST) 평일 오후 16시 00분 (장 마감 후 확정 데이터 결산)
+    # UTC 기준 07:00 (1-5: 월~금)
+    - cron: '0 7 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest # 최신 리눅스 서버 환경 대여
+    runs-on: ubuntu-latest
 
     steps:
     - name: 1. 저장소 코드 불러오기
@@ -20,15 +20,15 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: 3. 필요 부품(패키지) 설치
+    - name: 3. 필요 부품 설치
       run: |
         python -m pip install --upgrade pip
-        pip install finance-datareader pandas google-generativeai python-telegram-bot python-dotenv
+        pip install finance-datareader pandas google-generativeai python-telegram-bot python-dotenv gspread
 
     - name: 4. 브리핑 시스템 가동
       env:
-        # GitHub 비밀 금고에서 마스터 키를 꺼내와 주입
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
       run: python daily_briefing.py
