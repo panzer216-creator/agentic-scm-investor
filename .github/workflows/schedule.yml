@@ -21,7 +21,6 @@ jobs:
     - name: 3. 시스템 엔진 및 부품 설치 (DART, RSS 추가)
       run: |
         python -m pip install --upgrade pip
-        # 여기에 opendartreader와 feedparser가 반드시 추가되어야 합니다.
         pip install finance-datareader pandas google-generativeai python-telegram-bot python-dotenv gspread opendartreader feedparser
 
     - name: 4. V6.0 브리핑 파이프라인 가동
@@ -30,5 +29,5 @@ jobs:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
-        DART_API_KEY: ${{ secrets.DART_API_KEY }} # DART 출입증 추가
+        DART_API_KEY: ${{ secrets.DART_API_KEY }}
       run: python daily_briefing.py
