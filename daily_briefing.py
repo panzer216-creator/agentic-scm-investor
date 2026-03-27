@@ -21,13 +21,11 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 DART_API_KEY = os.getenv("DART_API_KEY")
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-# [패치 1] 공정 분리: JSON 강제 모델과 텍스트 전용 모델을 독립적으로 선언
 model = genai.GenerativeModel('gemini-2.5-flash', generation_config={"response_mime_type": "application/json"})
 model_text = genai.GenerativeModel('gemini-2.5-flash')
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1yApGhO57y_sWM30FbWWV44R2a3LhUomQvH7WloZTDmw/edit"
 
-# DART API 초기화 크래시 방어 (V6.0 패치 유지)
 try:
     dart = OpenDartReader(DART_API_KEY) if DART_API_KEY else None
 except Exception as e:
@@ -41,8 +39,22 @@ ETF_MAPPING = {
 }
 
 # ==========================================
-# 2. 분석 엔진 모듈
+# 2. 분석 엔진 및 통신 모듈
 # ==========================================
+
+# [신규 추가] API 과부하 방지 및 자동 재시도 (Auto-Recovery) 모듈
+async def fetch_ai_response_with_retry(target_model, prompt_text, retries=3):
+    for attempt in range(retries):
+        try:
+            res = await asyncio.to_thread(target_model.generate_content, prompt_text)
+            return res
+        except Exception as e:
+            if attempt < retries - 1:
+                print(f"⚠️ API 통신 지연 (재시도 {attempt+1}/{retries}). 10초 대기 후 재가동... 상세: {e}")
+                await asyncio.sleep(10) # 429 에러 대응 강력한 쿨링
+            else:
+                raise ValueError(f"API 호출 최종 실패: {e}")
+
 def calculate_indicators(df):
     delta = df['Close'].diff()
     gain = delta.where(delta > 0, 0).ewm(alpha=1/14, adjust=False).mean()
@@ -59,7 +71,6 @@ def calculate_indicators(df):
     df['Vol_MA5'] = df['Volume'].rolling(window=5).mean().shift(1)
     return df
 
-# 기간별 뉴스 스캐너 (장기 3m / 단기 7d 분리 가능)
 def get_news(stock_name, period="7d", limit=5):
     url = f"https://news.google.com/rss/search?q={stock_name}+when:{period}&hl=ko&gl=KR&ceid=KR:ko"
     try:
@@ -91,14 +102,16 @@ def split_by_lines(text, max_len=4000):
 async def send_message_safe(bot, text):
     for chunk in split_by_lines(text):
         await bot.send_message(chat_id=CHAT_ID, text=chunk, parse_mode='HTML')
+        # [신규 추가] 텔레그램 스팸 차단(Rate Limit) 방어 밸브
+        await asyncio.sleep(1) 
 
 # ==========================================
-# 3. 메인 파이프라인 (V7.0 듀얼 엔진)
+# 3. 메인 파이프라인 (V7.1 병목 제어 엔진)
 # ==========================================
 async def send_briefing():
     bot = Bot(token=TELEGRAM_TOKEN)
     today_str = datetime.today().strftime('%Y-%m-%d')
-    full_report = f"📅 <b>{today_str} 퀀트 통합 브리핑 (V7.0)</b>\n" + "━"*30 + "\n"
+    full_report = f"📅 <b>{today_str} 퀀트 통합 브리핑 (V7.1)</b>\n" + "━"*30 + "\n"
     log_data = []
     
     # [A] 구글 시트 연동 및 데이터 적재
@@ -110,7 +123,6 @@ async def send_briefing():
         
         raw_data = portfolio_ws.get_all_values()
         header = raw_data[0]
-        # C열(Core_Momentum) 헤더 자동 생성 방어
         if len(header) < 3 or header[2] != "Core_Momentum":
             portfolio_ws.update_cell(1, 3, "Core_Momentum")
             raw_data = portfolio_ws.get_all_values()
@@ -133,7 +145,7 @@ async def send_briefing():
     print("⏳ 장기 모멘텀(3개월) 스캐닝 중...")
     momentum_updates = []
     for stock in my_stocks:
-        if not stock["momentum"]: # C열이 비어있을 때만 가동 (트리거)
+        if not stock["momentum"]: 
             long_term_news = get_news(stock["name"], period="3m", limit=10)
             if long_term_news:
                 prompt_m = f"""
@@ -141,14 +153,18 @@ async def send_briefing():
                 최근 3개월 핵심 뉴스: {long_term_news}
                 위 뉴스를 분석하여, 향후 이 기업의 주가를 견인할 '가장 강력한 중장기 핵심 모멘텀(수주, 신작, 임상, 실적 등)'을 20자 이내의 단답형 평문으로 하나만 추출하세요. JSON 말고 그냥 텍스트만 출력하세요.
                 """
-                # [패치 1 반영] 텍스트 전용 모델(model_text) 사용으로 JSON 파싱 충돌 원천 차단
-                res_m = await asyncio.to_thread(model_text.generate_content, prompt_m)
-                extracted_momentum = res_m.text.strip().replace('"', '').replace('\n', ' ')
-                stock["momentum"] = extracted_momentum
-                momentum_updates.append({'range': f'C{stock["row_idx"]}', 'values': [[extracted_momentum]]})
-                await asyncio.sleep(2)
+                try:
+                    # [적용] 재시도 로직이 탑재된 통신 모듈 사용
+                    res_m = await fetch_ai_response_with_retry(model_text, prompt_m)
+                    extracted_momentum = res_m.text.strip().replace('"', '').replace('\n', ' ')
+                    stock["momentum"] = extracted_momentum
+                    momentum_updates.append({'range': f'C{stock["row_idx"]}', 'values': [[extracted_momentum]]})
+                except Exception as e:
+                    print(f"모멘텀 스캔 실패 ({stock['name']}): {e}")
+                
+                # [강화] API 15 RPM 한계 방어
+                await asyncio.sleep(3) 
 
-    # API 과부하 방지를 위한 일괄 저장 (Batch Update)
     if momentum_updates:
         try:
             portfolio_ws.batch_update(momentum_updates)
@@ -201,7 +217,6 @@ async def send_briefing():
             curr_s = df_stock.iloc[-1]
             prev_s = df_stock.iloc[-2]
             
-            # (V6.0 패치 유지) 다중 결측치(NaN) 완벽 검증
             if (pd.isna(curr_s['Close'])  or pd.isna(prev_s['Close'])  or
                 pd.isna(curr_s['MA60'])   or pd.isna(curr_s['MACD'])   or
                 pd.isna(curr_s['Signal']) or pd.isna(prev_s['Signal']) or
@@ -226,11 +241,9 @@ async def send_briefing():
             if macd_cross: score += 15
 
             is_yangbong = c_price > prev_price
-            # (V6.0 패치 유지) Vol_MA5 NaN 방어
             if pd.notna(curr_s['Vol_MA5']) and (curr_s['Volume'] > curr_s['Vol_MA5'] * 2) and is_yangbong: 
                 score += 10
             
-            # (V6.0 패치 유지) ZeroDivisionError 방어
             listed_shares = stock_row['Stocks'].values[0]
             turnover_ratio = 0.0 if not listed_shares or pd.isna(listed_shares) or int(listed_shares) == 0 else (curr_s['Volume'] / int(listed_shares)) * 100
             if turnover_ratio >= 2.0 and is_yangbong: score += 10
@@ -254,17 +267,16 @@ async def send_briefing():
             
             형식: {{"score": 정수, "fact_check": "최근 1주일 공시/실적 팩트 1줄 요약", "momentum_status": "추적 중인 핵심 모멘텀의 현재 진척 상황 및 시장 기대치 2줄 평가"}}
             """
-            response = await asyncio.to_thread(model.generate_content, prompt)
             
-            # (V6.0 패치 유지) 무중단 Fallback
+            # [적용] 재시도 로직 기반 통신 모듈 (최종 방어벽)
             try:
+                response = await fetch_ai_response_with_retry(model, prompt)
                 ai_data = json.loads(response.text.strip())
-            except (json.JSONDecodeError, ValueError):
-                ai_data = {"score": 15, "fact_check": "API 지연", "momentum_status": "AI 판독 불가(중립 유지)"}
+            except Exception:
+                ai_data = {"score": 15, "fact_check": "API 응답 실패", "momentum_status": "API 응답 지연(중립 유지)"}
                 
             fund_score = int(ai_data.get('score', 15))
             
-            # [패치 2 반영] 시트 저장용 Raw Data와 텔레그램 출력용 Escaped Data 분리
             fact_raw = ai_data.get('fact_check', '내용 없음')
             momentum_raw = ai_data.get('momentum_status', '내용 없음')
             
@@ -288,7 +300,6 @@ async def send_briefing():
             full_report += f"  • 📋 <b>팩트 체크:</b> {fact_txt}\n"
             full_report += f"  • 🚀 <b>모멘텀 추적:</b> {momentum_txt}\n"
 
-            # DB(구글 시트)에는 오염되지 않은 순수 원시 데이터(raw)만 저장
             log_data.append([
                 today_str, stock_name_original, total_score, rating,
                 c_price, round(curr_s['RSI'], 1), str(macd_cross), round(turnover_ratio, 2),
@@ -301,11 +312,11 @@ async def send_briefing():
             log_data.append([today_str, search_name, "ERROR", "ERROR", "", "", "", "", "", "", "", err_str])
 
         finally:
-            await asyncio.sleep(4)
+            # [강화] 일일 브리핑 루프 쿨타임 대폭 연장 (15 RPM 초과 완벽 방지)
+            await asyncio.sleep(6)
 
     await send_message_safe(bot, full_report)
 
-    # [E] 구글 시트 영구 기록 (Trade_Log 헤더 변경 반영)
     if log_data:
         try:
             worksheet = doc.worksheet("Trade_Log")
@@ -314,7 +325,7 @@ async def send_briefing():
                 headers = ["Date", "Stock", "Total_Score", "Rating", "Close", "RSI", "MACD_Cross", "Turnover_Ratio", "Fund_Score", "Fact_Check", "Momentum_Status", "Error_Reason"]
                 worksheet.append_row(headers)
             worksheet.append_rows(log_data)
-            print("✅ V7.0 구글 시트 영구 기록 완료!")
+            print("✅ V7.1 구글 시트 영구 기록 완료!")
         except Exception as e:
             await bot.send_message(chat_id=CHAT_ID, text=f"❌ 구글 시트 기록 실패: {html.escape(str(e))}")
 
