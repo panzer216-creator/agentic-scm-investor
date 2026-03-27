@@ -1,10 +1,8 @@
-name: Daily Stock Briefing
+name: Daily Stock Briefing V6
 
 on:
   schedule:
-    # 한국 시간(KST) 평일 오후 16시 00분 (장 마감 후 확정 데이터 결산)
-    # UTC 기준 07:00 (1-5: 월~금)
-    - cron: '0 7 * * 1-5'
+    - cron: '0 7 * * 1-5' # KST 16:00 (장 마감 후 결산)
   workflow_dispatch:
 
 jobs:
@@ -20,15 +18,17 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: 3. 필요 부품 설치
+    - name: 3. 시스템 엔진 및 부품 설치 (DART, RSS 추가)
       run: |
         python -m pip install --upgrade pip
-        pip install finance-datareader pandas google-generativeai python-telegram-bot python-dotenv gspread
+        # 여기에 opendartreader와 feedparser가 반드시 추가되어야 합니다.
+        pip install finance-datareader pandas google-generativeai python-telegram-bot python-dotenv gspread opendartreader feedparser
 
-    - name: 4. 브리핑 시스템 가동
+    - name: 4. V6.0 브리핑 파이프라인 가동
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+        DART_API_KEY: ${{ secrets.DART_API_KEY }} # DART 출입증 추가
       run: python daily_briefing.py
