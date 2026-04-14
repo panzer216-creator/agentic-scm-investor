@@ -1,29 +1,38 @@
 import FinanceDataReader as fdr
 import pandas as pd
 
-def test_data_source():
-    sources = [
-        ("KRX (한국거래소)", lambda: fdr.StockListing('KRX')),
-        ("NAVER (네이버)", lambda: fdr.DataReader('005930', '2024-01-01')), # 삼성전자 샘플
-        ("DAUM (다음)", lambda: fdr.DataReader('005930', '2024-01-01', exchange='DAUM'))
-    ]
-    
-    print("📋 [공급망 가동 테스트 리포트]\n" + "="*40)
-    
-    for name, func in sources:
+def audit_data_sources():
+    test_symbol = '005930' # 삼성전자
+    print(f"🔍 [공급망 전수 조사 시작 - {test_symbol}]")
+    print("="*50)
+
+    # 1. 종목 리스트(Listing) 공급처 테스트
+    listing_sources = ['KRX', 'KOSPI', 'KOSDAQ', 'NASDAQ']
+    for src in listing_sources:
         try:
-            result = func()
-            if result is not None and not result.empty:
-                status = "✅ 정상 (데이터 로드 성공)"
-                detail = f"항목수: {len(result)}"
-            else:
-                status = "⚠️ 경고 (빈 데이터 반환)"
-                detail = "내용 없음"
+            df = fdr.StockListing(src)
+            status = f"✅ 성공 (항목수: {len(df)})" if not df.empty else "⚠️ 빈 데이터"
+            print(f"📍 StockListing('{src}'): {status}")
         except Exception as e:
-            status = "❌ 실패 (연결 오류)"
-            detail = str(e)[:50] # 에러 메시지 앞부분만
-            
-        print(f"📍 {name}\n   상태: {status}\n   상세: {detail}\n" + "-"*40)
+            print(f"❌ StockListing('{src}'): 실패 (에러: {str(e)[:50]})")
+
+    print("-" * 50)
+
+    # 2. 개별 주가(Price) 공급처 테스트
+    # FinanceDataReader는 기본적으로 Naver/Daum 등을 내부적으로 선택합니다.
+    price_tests = [
+        ("기본 DataReader", lambda: fdr.DataReader(test_symbol)),
+        ("Naver 소스", lambda: fdr.DataReader(test_symbol, exchange='KRX')), # fdr의 KRX는 보통 Naver 기반
+        ("Daum 소스", lambda: fdr.DataReader(test_symbol, exchange='DAUM'))
+    ]
+
+    for name, func in price_tests:
+        try:
+            df = func()
+            status = f"✅ 성공 (최근 종가: {df['Close'].iloc[-1]})" if not df.empty else "⚠️ 빈 데이터"
+            print(f"📍 {name}: {status}")
+        except Exception as e:
+            print(f"❌ {name}: 실패 (에러: {str(e)[:50]})")
 
 if __name__ == "__main__":
-    test_data_source()
+    audit_data_sources()
