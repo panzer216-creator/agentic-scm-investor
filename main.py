@@ -2,6 +2,7 @@ import os
 import json
 import time
 import html
+import re
 import pandas as pd
 import FinanceDataReader as fdr
 import requests
@@ -47,35 +48,44 @@ def init_google_sheets():
     
     return sheet
 
-# --- [4. Module: Leading Stock Scanner - 버퍼 확대] ---
+# --- [4. Module: Leading Stock Scanner - 강건한 파싱 & 백업 적용] ---
 def get_leading_stocks_dynamic():
     try:
         df_kospi = fdr.StockListing('KOSPI')
         df_kosdaq = fdr.StockListing('KOSDAQ')
         all_stocks = pd.concat([df_kospi, df_kosdaq])
-        all_stocks = all_stocks[all_stocks['Marcap'] >= 150000000000] # 시총 1500억 이상
+        all_stocks = all_stocks[all_stocks['Marcap'] >= 150000000000] 
         
         all_stocks['Turnover_Rate'] = all_stocks['Amount'] / all_stocks['Marcap']
-        candidates = all_stocks.sort_values(by='Turnover_Rate', ascending=False).head(30)
-        candidate_list = [f"{row['Name']}({row['Code']})" for _, row in candidates.iterrows()]
+        # 상위 30개를 후보로 확보
+        top_candidates = all_stocks.sort_values(by='Turnover_Rate', ascending=False).head(30)
+        candidate_list = [f"{row['Name']}({row['Code']})" for _, row in top_candidates.iterrows()]
 
-        # 모수를 15개로 확대하여 기술적 필터링의 완충지대 확보
         prompt = f"""
-        당신은 전문 트레이더입니다. 다음 30개 종목 중 오늘 시장 주도주 15개를 선정하세요.
-        조건: 섹터 분산 필수, 지수형 ETF 제외.
-        반환: 오직 '종목명,종목코드,섹터' 형식만 줄바꿈으로 출력.
+        당신은 전문 트레이더입니다. 다음 종목 중 주도주 15개를 선정하세요.
+        반환 형식: 종목명,종목코드,섹터 (설명 없이 한 줄에 하나씩)
         리스트: {', '.join(candidate_list)}
         """
+        
         response = GEMINI_MODEL.generate_content(prompt)
-        lines = response.text.strip().split('\n')
-        
         final_selection = []
-        for line in lines:
-            parts = line.split(',')
-            if len(parts) >= 3:
-                final_selection.append((parts[0].strip(), parts[1].strip(), parts[2].strip()))
         
-        return final_selection # 15개 내외 반환
+        if response and response.text:
+            lines = response.text.strip().split('\n')
+            for line in lines:
+                # 숫자 리스트나 특수문자 제거 후 파싱
+                clean_line = re.sub(r'^[0-9.\-\s*]+', '', line)
+                parts = clean_line.split(',')
+                if len(parts) >= 3:
+                    final_selection.append((parts[0].strip(), parts[1].strip(), parts[2].strip()))
+        
+        # [백업 로직] AI가 못 골랐을 경우, 회전율 상위 10개를 섹터 미상으로 강제 투입
+        if not final_selection:
+            print("AI 선별 실패 - 백업 로직 가동 (회전율 상위 10개)")
+            for _, row in top_candidates.head(10).iterrows():
+                final_selection.append((row['Name'], row['Code'], "회전율상위(백업)"))
+        
+        return final_selection
     except Exception as e:
         print(f"스캐닝 오류: {e}")
         return []
@@ -87,7 +97,6 @@ def calculate_trading_signals(symbol):
         df = fdr.DataReader(symbol, start_date)
         if len(df) < 20: return None
         df = df.tail(20)
-        
         high_price = df['High'].max()
         tr = pd.concat([df['High'] - df['Low'], abs(df['High'] - df['Close'].shift(1)), abs(df['Low'] - df['Close'].shift(1))], axis=1).max(axis=1)
         atr = tr.rolling(14).mean().iloc[-1]
@@ -106,24 +115,18 @@ def send_telegram_with_retry(token, chat_id, text):
     except:
         pass
 
-# --- [7. Main Workflow - 공정 제어 로직] ---
+# --- [7. Main Workflow] ---
 def main():
     try:
         sheet_service = init_google_sheets()
-        ai_selected_stocks = get_leading_stocks_dynamic()
+        stocks = get_leading_stocks_dynamic()
         
-        if not ai_selected_stocks:
-            send_telegram_with_retry(os.environ['TELEGRAM_BOT_TOKEN'], os.environ['TELEGRAM_CHAT_ID'], "⚠️ [공정 보고] Gemini가 후보군에서 종목을 선별하지 못했습니다.")
-            return
-
         trading_data = []
-        telegram_msg = f"🚨 <b>[에이전트 MTS 지시서]</b>\n"
-        telegram_msg += f"<i>(분석: {len(ai_selected_stocks)}개 후보 중 최적 종목 추출)</i>\n\n"
+        telegram_msg = f"🚨 <b>[에이전트 MTS 지시서]</b>\n\n"
         
         success_count = 0
-
-        for name, code, theme in ai_selected_stocks:
-            if success_count >= 5: break # 최종 5개만 선별
+        for name, code, theme in stocks:
+            if success_count >= 5: break
             
             res = calculate_trading_signals(code)
             if not res: continue
@@ -132,16 +135,14 @@ def main():
             entry, stop = res
             name_esc = html.escape(name)
             
-            trading_data.append([datetime.now().strftime("%Y-%m-%d"), theme, f"{name}({code})", entry, stop, "SCM 분석 및 AI 필터링", "대기", "N/A"])
+            trading_data.append([datetime.now().strftime("%Y-%m-%d"), theme, f"{name}({code})", entry, stop, "SCM/AI 통합 분석", "대기", "N/A"])
             telegram_msg += f"🎯 <b>{name_esc}</b>\n- 섹터: {theme}\n- 타점: {entry:,}원\n- 손절: {stop:,}원\n\n"
 
         if trading_data:
             sheet_service.values().append(spreadsheetId=SHEET_ID, range=f"'{TARGET_TAB}'!A2", valueInputOption="RAW", insertDataOption="INSERT_ROWS", body={"values": trading_data}).execute()
             send_telegram_with_retry(os.environ['TELEGRAM_BOT_TOKEN'], os.environ['TELEGRAM_CHAT_ID'], telegram_msg)
-            print(f"공정 성공: {success_count}개 종목 출하")
         else:
-            send_telegram_with_retry(os.environ['TELEGRAM_BOT_TOKEN'], os.environ['TELEGRAM_CHAT_ID'], 
-                                     f"⚠️ [수율 저하] AI가 {len(ai_selected_stocks)}개를 골랐으나, 기술적 조건을 통과한 종목이 없습니다.")
+            send_telegram_with_retry(os.environ['TELEGRAM_BOT_TOKEN'], os.environ['TELEGRAM_CHAT_ID'], "⚠️ 분석 조건에 부합하는 종목이 없어 오늘은 관망합니다.")
             
     except Exception as e:
         print(f"시스템 중단: {e}")
