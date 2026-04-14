@@ -11,8 +11,8 @@ from googleapiclient.discovery import build
 
 # --- [1. Configuration] ---
 SHEET_ID = '1YEX5v1n-yxv3igE_ItbbFfJAMQcNZ7vTF9CRaf39cP0'
-SOURCE_TAB = "Seed_Data_414"  # 원자재 창고
-TARGET_TAB = "Trading_Log"    # 출하대
+SOURCE_TAB = "Seed_Data_414"
+TARGET_TAB = "Trading_Log"
 
 # --- [2. Google Sheets Logic] ---
 def get_service():
@@ -22,22 +22,21 @@ def get_service():
     return build('sheets', 'v4', credentials=creds).spreadsheets()
 
 def get_stock_list_from_sheet(service):
-    # Seed_Data_414 탭의 B열(종목명)을 읽어옴
+    # Seed_Data_414 탭의 B열(종목명)을 50개 읽어옴
     range_name = f"'{SOURCE_TAB}'!B2:B51"
     result = service.values().get(spreadsheetId=SHEET_ID, range=range_name).execute()
     values = result.get('values', [])
     return [row[0] for row in values if row]
 
-# --- [3. Module: Pricing Logic with Safety Buffer] ---
-def calculate_signals(name):
-    # 네이버 서버 부하 방지 (1초 대기)
-    time.sleep(1)
-    
+# --- [3. Module: Pricing Logic with Audit] ---
+def calculate_signals_with_log(name):
+    time.sleep(1) # 네이버 부하 방지
     start_date = (datetime.today() - timedelta(days=60)).strftime('%Y-%m-%d')
     try:
-        # 네이버 소스를 통한 가격 데이터 로드
+        # FinanceDataReader가 종목명으로 시세를 제대로 가져오는지 확인
         df = fdr.DataReader(name, start_date)
-        if df is None or len(df) < 15: return None
+        if df is None or df.empty: return f"❌ {name}: 데이터 로드 실패(Empty)"
+        if len(df) < 15: return f"❌ {name}: 데이터 부족({len(df)}일)"
         
         df = df.tail(20)
         high_price = df['High'].max()
@@ -45,11 +44,14 @@ def calculate_signals(name):
         tr = pd.concat([df['High']-df['Low'], abs(df['High']-df['Close'].shift(1)), abs(df['Low']-df['Close'].shift(1))], axis=1).max(axis=1)
         atr = tr.rolling(14).mean().iloc[-1]
         
-        entry_target = max(vwap_5d.iloc[-1], high_price - (1.5 * atr))
-        return round(entry_target), round(entry_target * 0.90)
+        entry = max(vwap_5d.iloc[-1], high_price - (1.5 * atr))
+        return {
+            "entry": round(entry),
+            "stop": round(entry * 0.90),
+            "msg": f"✅ {name}: 분석 성공"
+        }
     except Exception as e:
-        print(f"⚠️ {name} 분석 실패: {e}")
-        return None
+        return f"❌ {name}: 에러({str(e)[:15]})"
 
 # --- [4. Main Workflow] ---
 def main():
@@ -58,43 +60,39 @@ def main():
     
     try:
         service = get_service()
-        
-        # 1. 시트에서 원자재(종목 리스트) 로드
         stock_names = get_stock_list_from_sheet(service)
+        
         if not stock_names:
-            print("원자재 창고가 비어있습니다.")
+            requests.post(f"https://api.telegram.org/bot{token}/sendMessage", data={"chat_id": chat_id, "text": "⚠️ [공정 중단] 시트에서 종목 리스트를 읽지 못했습니다."})
             return
 
         trading_data = []
-        telegram_msg = "🚨 <b>[V1.9 시트 기반 자립형 리포트]</b>\n"
-        telegram_msg += f"<i>({SOURCE_TAB} 리스트 분석 결과)</i>\n\n"
+        audit_logs = []
+        telegram_msg = "🚨 <b>[V1.9.1 자립형 공정 감사 리포트]</b>\n\n"
         
-        # 2. 상위 15개 종목에 대해서만 우선 정밀 가공 (부하 관리)
+        # 상위 15개 종목 정밀 분석
         for name in stock_names[:15]:
-            res = calculate_signals(name)
-            if not res: continue
+            result = calculate_signals_with_log(name)
             
-            entry, stop = res
-            trading_data.append([
-                datetime.now().strftime("%Y-%m-%d"), "시트기반", name, entry, stop, "자립형 공정 테스트", "대기", "N/A"
-            ])
-            telegram_msg += f"🎯 <b>{html.escape(name)}</b>\n- 타점: {entry:,}원 | 손절: {stop:,}원\n\n"
+            if isinstance(result, dict): # 성공 시
+                entry, stop = result['entry'], result['stop']
+                trading_data.append([datetime.now().strftime("%Y-%m-%d"), "시트기반", name, entry, stop, "자립형 테스트", "대기", "N/A"])
+                telegram_msg += f"🎯 <b>{html.escape(name)}</b>\n- 타점: {entry:,}원 | 손절: {stop:,}원\n\n"
+                audit_logs.append(result['msg'])
+            else: # 실패 시 사유 기록
+                audit_logs.append(result)
 
-        # 3. 결과 출하
+        # 텔레그램으로 최종 보고 (성공/실패 상관없이 무조건 발송)
+        final_report = telegram_msg + "\n------------------\n🔍 <b>공정 상세 로그 (Top 15)</b>\n" + "\n".join(audit_logs)
+        
         if trading_data:
-            service.values().append(
-                spreadsheetId=SHEET_ID, range=f"'{TARGET_TAB}'!A2",
-                valueInputOption="RAW", insertDataOption="INSERT_ROWS", body={"values": trading_data}
-            ).execute()
-            
-            requests.post(f"https://api.telegram.org/bot{token}/sendMessage", 
-                          data={"chat_id": chat_id, "text": telegram_msg, "parse_mode": "HTML"})
-            print("공정 완료")
-        else:
-            print("타점 조건 충족 종목 없음")
+            service.values().append(spreadsheetId=SHEET_ID, range=f"'{TARGET_TAB}'!A2", valueInputOption="RAW", insertDataOption="INSERT_ROWS", body={"values": trading_data}).execute()
+        
+        requests.post(f"https://api.telegram.org/bot{token}/sendMessage", data={"chat_id": chat_id, "text": final_report, "parse_mode": "HTML"})
+        print("공정 완료 및 리포트 발송 성공")
             
     except Exception as e:
-        print(f"시스템 중단: {e}")
+        requests.post(f"https://api.telegram.org/bot{token}/sendMessage", data={"chat_id": chat_id, "text": f"❌ 시스템 중단: {e}"})
 
 if __name__ == "__main__":
     main()
