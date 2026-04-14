@@ -1,17 +1,16 @@
-name: Agentic-Investment-System-V1
+name: Agentic-Investment-Scm-Bot
 
 on:
   schedule:
-    # 한국 시간(KST) 매일 오전 7시 실행 (UTC 22:00)
-    - cron: '0 22 * * 0-4' 
-  workflow_dispatch: # 필요 시 수동 실행 버튼
+    # 매일 월~금 오전 7시 (UTC 22:00)
+    - cron: '0 22 * * 0-4'
+  workflow_dispatch:
 
 jobs:
-  build:
+  run-agent:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -19,16 +18,14 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
-          pip install pandas finance-datareader google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client requests
+          pip install pandas finance-datareader google-api-python-client google-auth requests
 
-      - name: Run Analysis Agent
+      - name: Execute Analysis Engine
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
-          # 구글 서비스 계정 JSON도 secrets에 저장되어 있어야 함
-          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
         run: python main.py
