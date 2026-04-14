@@ -1,60 +1,100 @@
 import os
 import json
-from datetime import datetime
+import time
+import html
+import pandas as pd
+import FinanceDataReader as fdr
+import requests
+from datetime import datetime, timedelta
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
 # --- [1. Configuration] ---
 SHEET_ID = '1YEX5v1n-yxv3igE_ItbbFfJAMQcNZ7vTF9CRaf39cP0'
-# 테스트용 시딩 탭 이름 (없으면 생성됨)
-SEED_TAB = "Seed_Data_414"
-HEADERS = ["Date", "Stock Name", "Status"]
-
-# [4/14 거래대금 상위 50개 확정 리스트]
-# 시장 데이터를 기반으로 추출한 실제 리스트입니다.
-TOP_50_STOCKS = [
-    "삼성전자", "SK하이닉스", "한미반도체", "현대차", "알테오젠", "셀트리온", "기아", "HLB", "에코프로머티", "이수페타시스",
-    "테크윙", "제주반도체", "가온칩스", "오픈엣지테크놀로지", "에이직랜드", "유한양행", "리가켐바이오", "삼양식품", "브이티", "실리콘투",
-    "엔켐", "신성델타테크", "레인보우로보틱스", "두산로보틱스", "솔브레인", "동진쎄미켐", "하나마이크론", "네오셈", "에스앤에스텍", "주성엔지니어링",
-    "이오테크닉스", "피에스케이홀딩스", "에스티아이", "GST", "케이씨텍", "원익홀딩스", "유니테스트", "와이씨", "아이엠티", "필옵틱스",
-    "현대로템", "LIG넥스원", "한화에어로스페이스", "한국금융지주", "메리츠금융지주", "삼성생명", "삼성화재", "DB손해보험", "흥국화재", "제주은행"
-]
+SOURCE_TAB = "Seed_Data_414"  # 원자재 창고
+TARGET_TAB = "Trading_Log"    # 출하대
 
 # --- [2. Google Sheets Logic] ---
-def seed_data_to_sheet():
+def get_service():
     creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
     creds_dict = json.loads(creds_json)
     creds = Credentials.from_service_account_info(creds_dict, scopes=['https://www.googleapis.com/auth/spreadsheets'])
-    service = build('sheets', 'v4', credentials=creds)
-    sheet = service.spreadsheets()
+    return build('sheets', 'v4', credentials=creds).spreadsheets()
 
-    # 1. 탭 존재 여부 확인 및 생성
-    spreadsheet = sheet.get(spreadsheetId=SHEET_ID).execute()
-    sheet_names = [s['properties']['title'] for s in spreadsheet.get('sheets', [])]
+def get_stock_list_from_sheet(service):
+    # Seed_Data_414 탭의 B열(종목명)을 읽어옴
+    range_name = f"'{SOURCE_TAB}'!B2:B51"
+    result = service.values().get(spreadsheetId=SHEET_ID, range=range_name).execute()
+    values = result.get('values', [])
+    return [row[0] for row in values if row]
+
+# --- [3. Module: Pricing Logic with Safety Buffer] ---
+def calculate_signals(name):
+    # 네이버 서버 부하 방지 (1초 대기)
+    time.sleep(1)
     
-    if SEED_TAB not in sheet_names:
-        batch_update_request = {
-            'requests': [{'addSheet': {'properties': {'title': SEED_TAB}}}]
-        }
-        sheet.batchUpdate(spreadsheetId=SHEET_ID, body=batch_update_request).execute()
-        print(f"'{SEED_TAB}' 탭 생성 완료.")
+    start_date = (datetime.today() - timedelta(days=60)).strftime('%Y-%m-%d')
+    try:
+        # 네이버 소스를 통한 가격 데이터 로드
+        df = fdr.DataReader(name, start_date)
+        if df is None or len(df) < 15: return None
+        
+        df = df.tail(20)
+        high_price = df['High'].max()
+        vwap_5d = (df['Close'] * df['Volume']).rolling(5).sum() / df['Volume'].rolling(5).sum()
+        tr = pd.concat([df['High']-df['Low'], abs(df['High']-df['Close'].shift(1)), abs(df['Low']-df['Close'].shift(1))], axis=1).max(axis=1)
+        atr = tr.rolling(14).mean().iloc[-1]
+        
+        entry_target = max(vwap_5d.iloc[-1], high_price - (1.5 * atr))
+        return round(entry_target), round(entry_target * 0.90)
+    except Exception as e:
+        print(f"⚠️ {name} 분석 실패: {e}")
+        return None
 
-    # 2. 헤더 및 데이터 준비
-    today = "2026-04-14"
-    data_to_write = [HEADERS]
-    for name in TOP_50_STOCKS:
-        data_to_write.append([today, name, "Raw Data"])
-
-    # 3. 데이터 기록 (기존 내용 삭제 후 새로 기록)
-    sheet.values().clear(spreadsheetId=SHEET_ID, range=f"'{SEED_TAB}'!A:C").execute()
-    sheet.values().update(
-        spreadsheetId=SHEET_ID, 
-        range=f"'{SEED_TAB}'!A1", 
-        valueInputOption="RAW", 
-        body={"values": data_to_write}
-    ).execute()
+# --- [4. Main Workflow] ---
+def main():
+    token = os.environ.get('TELEGRAM_BOT_TOKEN')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID')
     
-    print(f"성공: 4/14 거래대금 상위 50개 품목을 '{SEED_TAB}' 탭에 기록했습니다.")
+    try:
+        service = get_service()
+        
+        # 1. 시트에서 원자재(종목 리스트) 로드
+        stock_names = get_stock_list_from_sheet(service)
+        if not stock_names:
+            print("원자재 창고가 비어있습니다.")
+            return
+
+        trading_data = []
+        telegram_msg = "🚨 <b>[V1.9 시트 기반 자립형 리포트]</b>\n"
+        telegram_msg += f"<i>({SOURCE_TAB} 리스트 분석 결과)</i>\n\n"
+        
+        # 2. 상위 15개 종목에 대해서만 우선 정밀 가공 (부하 관리)
+        for name in stock_names[:15]:
+            res = calculate_signals(name)
+            if not res: continue
+            
+            entry, stop = res
+            trading_data.append([
+                datetime.now().strftime("%Y-%m-%d"), "시트기반", name, entry, stop, "자립형 공정 테스트", "대기", "N/A"
+            ])
+            telegram_msg += f"🎯 <b>{html.escape(name)}</b>\n- 타점: {entry:,}원 | 손절: {stop:,}원\n\n"
+
+        # 3. 결과 출하
+        if trading_data:
+            service.values().append(
+                spreadsheetId=SHEET_ID, range=f"'{TARGET_TAB}'!A2",
+                valueInputOption="RAW", insertDataOption="INSERT_ROWS", body={"values": trading_data}
+            ).execute()
+            
+            requests.post(f"https://api.telegram.org/bot{token}/sendMessage", 
+                          data={"chat_id": chat_id, "text": telegram_msg, "parse_mode": "HTML"})
+            print("공정 완료")
+        else:
+            print("타점 조건 충족 종목 없음")
+            
+    except Exception as e:
+        print(f"시스템 중단: {e}")
 
 if __name__ == "__main__":
-    seed_data_to_sheet()
+    main()
