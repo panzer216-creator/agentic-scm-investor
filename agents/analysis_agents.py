@@ -6,11 +6,11 @@ from google import genai
 from google.genai import types
 
 class BaseAnalysisAgent:
-    # [ECO-01] Graceful Degradation 모델 폴백 체인 구성
+    # [ECO-01] 2026년 4월 기준 실가동 확인된 공식 모델 ID 체인
     MODEL_CHAIN = [
-        "gemini-2.5-pro-preview-05-06", # 우선 가동 모델 (Plan A)
-        "gemini-2.0-flash",             # Plan B
-        "gemini-1.5-pro",               # Plan C
+        "gemini-3.1-pro-preview",   # Plan A: 최신 고성능 추론 모델 (2026-02 출시)
+        "gemini-3-flash-preview",   # Plan B: 차세대 고속 분석 모델
+        "gemini-2.5-flash",         # Plan C: 검증된 스테이블 모델 (백업용)
     ]
 
     def __init__(self, persona, weight=50):
@@ -20,7 +20,7 @@ class BaseAnalysisAgent:
 
     def _safe_parse_json(self, text: str) -> dict:
         """[ECO-02] LLM 응답에서 마크다운 펜스를 걷어내고 안전하게 JSON만 추출"""
-        # UI 복사 버그 방지를 위해 백틱 3개를 문자열 연산으로 우회 생성
+        # 플랫폼 UI의 백틱 복사 버그를 방지하기 위해 문자열 연산으로 우회
         fence = "`" * 3 
         pattern = rf"{fence}(?:json)?\s*(\{.*?\})\s*{fence}"
         
@@ -39,7 +39,7 @@ class BaseAnalysisAgent:
         [사고 구조 - SCM 관점 적용]
         1. 단기 뷰 (1~3M): 노이즈, 수급, 일회성 비용, 노동/파업 리스크
         2. 장기 뷰 (1~3Y): 본질 가치, 수율(Yield), CAPEX, 선단 공정 기술 로드맵
-        3. 공급망(Context) 효과: 전방 고객사(수요)와 경쟁사 동향에 미칠 파급 효과 계산
+        3. 공급망(Context) 효과: 전방 고객사(수요)와 경쟁사 동향에 미칠 파격 효과 계산
         
         반드시 JSON 객체 하나만 반환하고, risk_score(0~10 사이의 숫자) 필드를 반드시 포함하세요."""
         
@@ -54,15 +54,15 @@ class BaseAnalysisAgent:
                         response_mime_type="application/json"
                     )
                 )
-                logging.info(f"[{self.persona}] 모델 '{model_name}' 사용 성공")
+                logging.info(f"[{self.persona}] 검증된 모델 '{model_name}' 가동 성공")
                 return self._safe_parse_json(response.text)
             
             except Exception as e:
                 last_error = e
-                logging.warning(f"[{self.persona}] 모델 '{model_name}' 연산 실패: {e}. 폴백 모델 탐색 중...")
+                logging.warning(f"[{self.persona}] 모델 '{model_name}' 호출 실패: {e}. 다음 체인으로 폴백.")
 
-        logging.error(f"[{self.persona}] 전체 모델 체인 붕괴: {last_error}")
-        return {"risk_score": 5, "summary": "모델 체인 전체 실패. 시스템 보호를 위한 기본값 리턴.", "model_chain_exhausted": True}
+        logging.error(f"[{self.persona}] 모든 가용 모델 체인 실패: {last_error}")
+        return {"risk_score": 5, "summary": "엔진 전체 점검 필요. 시스템 보호를 위한 기본값 리턴.", "model_chain_exhausted": True}
 
 class BullAgent(BaseAnalysisAgent): pass
 class RedTeamAgent(BaseAnalysisAgent): pass
