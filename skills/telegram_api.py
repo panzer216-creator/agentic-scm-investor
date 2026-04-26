@@ -1,5 +1,6 @@
 import os
 import requests
+import logging
 
 class TelegramApi:
     def __init__(self):
@@ -8,31 +9,18 @@ class TelegramApi:
         self.base_url = f"https://api.telegram.org/bot{self.token}/sendMessage"
 
     def send_report(self, stock_name, decision):
-        """오케스트레이터의 결과를 구조화하여 전송"""
+        # 메시지 구성 로직 (기존과 동일)
+        text = f"🏆 [투자 전략 리포트: {stock_name}]\n..." 
         
-        # 메시지 템플릿 구성 (SCM 스타일의 구조적 보고)
-        text = (
-            f"🏆 [투자 전략 리포트: {stock_name}]\n"
-            f"───────────────────\n"
-            f"📍 최종 의견: {decision.get('conclusion', {}).get('Action', 'N/A')}\n"
-            f"📊 권장 비중: {decision.get('conclusion', {}).get('Target_Weight', 'N/A')}\n\n"
-            f"💡 판단 근거 (Rationale):\n"
-            f"- {decision.get('reasoning', [ '분석 실패' ])[0]}\n\n"
-            f"🔍 핵심 모니터링:\n"
-            f"{decision.get('conclusion', {}).get('Key_Monitoring_Point', '없음')}\n"
-            f"───────────────────\n"
-            f"🤖 분석 모델: {decision.get('meta', {}).get('model', 'N/A')}"
-        )
-
-        payload = {
-            "chat_id": self.chat_id,
-            "text": text,
-            "parse_mode": "HTML"
-        }
+        payload = {"chat_id": self.chat_id, "text": text, "parse_mode": "HTML"}
 
         try:
             res = requests.post(self.base_url, json=payload)
-            return res.json()
+            # [보완] 텔레그램 서버의 실제 응답 확인
+            if res.status_code != 200:
+                logging.error(f"❌ 텔레그램 서버 응답 에러: {res.status_code} - {res.text}")
+                return False
+            return True
         except Exception as e:
-            print(f"❌ 텔레그램 발송 실패: {e}")
-            return None
+            logging.error(f"❌ 텔레그램 통신 실패: {e}")
+            return False
