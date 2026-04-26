@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agentic SCM Investor Dashboard v2.2</title>
+    <title>산업 병목 추적 & 투자 매트릭스 v2.2</title>
     <style>
         :root {
             --primary: #2c3e50; --accent: #e67e22; --bg: #f5f7fa;
@@ -26,32 +26,41 @@
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary); padding-bottom: 15px; }
         .header h1 { font-size: 1.4rem; color: var(--primary); }
         
-        .andon-banner { display: none; background: #ff7675; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; border-left: 10px solid #d63031; font-size: 0.85rem; }
+        /* Dashboard Summary Card */
+        .info-box { background: var(--card); border: 1px solid var(--border); border-left: 5px solid var(--primary); border-radius: 8px; padding: 15px; margin-bottom: 25px; font-size: 0.85rem; }
         
+        /* Group Section */
         .group-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 30px; border: 1px solid var(--border); }
         .group-header h2 { font-size: 1.2rem; color: var(--primary); border-left: 6px solid var(--accent); padding-left: 10px; margin-bottom: 10px; }
-        
-        .item-row { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--card); margin-bottom: 12px; }
-        .item-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; cursor: pointer; transition: background 0.2s; }
+
+        /* Item Row */
+        .item-row { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--card); margin-bottom: 8px; transition: all 0.2s; }
+        .item-top { display: flex; justify-content: space-between; align-items: center; padding: 15px; cursor: pointer; }
         .item-top:hover { background: var(--box-bg); }
         .corp-name { font-weight: bold; font-size: 1.05rem; }
-        .status-pill { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; color: #fff; font-weight: bold; }
+        .status-pill { font-size: 0.75rem; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; }
 
         .item-content { display: none; padding: 15px; background: var(--box-bg); border-top: 1px solid var(--border); }
         .item-content.active { display: block; }
         
+        /* 6 Metrics Grid */
         .grid-data { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .data-box { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 6px; text-align: center; }
         .label { font-size: 0.6rem; color: var(--wait); display: block; margin-bottom: 2px; }
         .val { font-size: 0.85rem; font-weight: bold; color: var(--primary); }
 
+        /* Value Slider */
+        .slider-container { margin-bottom: 15px; }
         .slider-track { height: 8px; background: linear-gradient(to right, var(--buy) 0%, #f1c40f 50%, var(--strong-buy) 100%); border-radius: 4px; position: relative; margin: 12px 0; }
-        .slider-ptr { width: 4px; height: 16px; background: var(--text); position: absolute; top: -4px; border: 1px solid #fff; transition: left 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .slider-ptr { width: 4px; height: 16px; background: var(--text); position: absolute; top: -4px; border: 1px solid #fff; transition: left 0.8s ease; }
         
+        /* Reasoning Box */
         .why-box { background: var(--why-bg); padding: 12px; border-radius: 8px; font-size: 0.8rem; border-left: 4px solid var(--primary); margin-bottom: 15px; }
-        .target-box { padding: 10px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 6px; border: 1px solid var(--border); background: var(--target-buy-bg); border-left: 4px solid var(--buy); }
+        .target-box { padding: 10px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 6px; border: 1px solid var(--border); }
+        .target-buy { background: var(--target-buy-bg); border-left: 4px solid var(--buy); }
+        .target-sell { background: var(--target-sell-bg); border-left: 4px solid var(--strong-buy); }
 
-        .empty-msg { text-align: center; color: var(--wait); padding: 20px; font-size: 0.8rem; font-style: italic; }
+        .empty-msg { text-align: center; padding: 20px; color: var(--wait); font-style: italic; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -59,112 +68,118 @@
 <div class="container">
     <header class="header">
         <h1>🏗️ 산업 병목 추적 & 투자 매트릭스 v2.2</h1>
-        <p id="update-ts" style="font-size: 0.65rem; color: var(--wait); margin-top: 5px;"></p>
+        <p id="update-time" style="font-size: 0.65rem; color: var(--wait); margin-top:5px;"></p>
     </header>
 
-    <div id="andon-banner" class="andon-banner"></div>
+    <div class="info-box">
+        <b>💡 다품종 동적 가동:</b> 버킷에서 조달한 종목들을 전략 그룹별로 자동 분류합니다. 각 종목을 <b>클릭</b>하여 상세 SCM 분석 리포트를 확인하세요.
+    </div>
 
-    <!-- 전략 그룹 섹션 (백엔드의 group_id와 매핑됨) -->
     <div class="group-card">
         <div class="group-header"><h2>A. 디지털 고도화 (HBM/AI)</h2></div>
-        <div id="list-a" class="item-list"><p class="empty-msg">분석 데이터를 기다리는 중...</p></div>
+        <div id="list-a" class="item-list"><p class="empty-msg">데이터 로드 중...</p></div>
     </div>
 
     <div class="group-card">
         <div class="group-header"><h2>B. 물리적 인프라 (전력/변압기)</h2></div>
-        <div id="list-b" class="item-list"><p class="empty-msg">분석 데이터를 기다리는 중...</p></div>
+        <div id="list-b" class="item-list"><p class="empty-msg">데이터 로드 중...</p></div>
     </div>
 
     <div class="group-card">
         <div class="group-header"><h2>C. 글로벌 패권 (방산/자원)</h2></div>
-        <div id="list-c" class="item-list"><p class="empty-msg">분석 데이터를 기다리는 중...</p></div>
+        <div id="list-c" class="item-list"><p class="empty-msg">데이터 로드 중...</p></div>
     </div>
 
     <div class="group-card">
         <div class="group-header"><h2>D. 조선/중공업 (OPEX)</h2></div>
-        <div id="list-d" class="item-list"><p class="empty-msg">분석 데이터를 기다리는 중...</p></div>
+        <div id="list-d" class="item-list"><p class="empty-msg">데이터 로드 중...</p></div>
     </div>
 </div>
 
 <script>
-    async function loadAndRender() {
+    // 아코디언 토글 함수
+    function toggleAccordion(el) {
+        const content = el.nextElementSibling;
+        content.classList.toggle('active');
+    }
+
+    async function loadDashboard() {
         try {
-            // 깃허브 저장소 내의 JSON 파일 경로
             const response = await fetch('./data/analysis_history.json');
             if (!response.ok) throw new Error("JSON 파일을 찾을 수 없습니다.");
             const history = await response.json();
             
-            // 1. 중복 제거: 각 종목별로 가장 최신 기록 하나만 남김
+            // 1. 종목별 최신 데이터만 필터링
             const latestMap = new Map();
-            history.forEach(item => {
-                latestMap.set(item.company_name, item);
-            });
+            history.forEach(item => latestMap.set(item.company_name, item));
             const latestData = Array.from(latestMap.values());
 
-            // 2. 각 섹션 초기화 (로딩 메시지 제거)
+            // 2. 컨테이너 초기화
             const groups = ['list-a', 'list-b', 'list-c', 'list-d'];
-            groups.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.innerHTML = '';
-            });
+            groups.forEach(id => document.getElementById(id).innerHTML = '');
 
-            // 3. 데이터를 순회하며 해당하는 group_id 섹션에 카드를 추가
+            // 3. 데이터 렌더링
             latestData.forEach(item => {
-                const targetId = item.group_id || 'list-a'; // 데이터에 group_id가 없으면 A로 기본 할당
+                const targetId = item.group_id || 'list-a';
                 const container = document.getElementById(targetId);
                 if (!container) return;
 
                 const card = document.createElement('div');
                 card.className = 'item-row';
                 
-                // 리스크 게이지 기반 색상 선정
-                const riskColor = item.conclusion.Gauge_Bar > 70 ? 'var(--strong-buy)' : (item.conclusion.Gauge_Bar > 40 ? 'var(--accent)' : 'var(--buy)');
+                // 등급별 색상 매핑
+                const action = item.conclusion.Action;
+                let pillColor = 'var(--wait)';
+                if (action.includes('매수') || action.includes('추천')) pillColor = 'var(--buy)';
+                if (action.includes('강력') || action.includes('즉시')) pillColor = 'var(--strong-buy)';
 
                 card.innerHTML = `
-                    <div class="item-top" onclick="this.nextElementSibling.classList.toggle('active')">
+                    <div class="item-top" onclick="toggleAccordion(this)">
                         <div class="corp-name">${item.company_name}</div>
-                        <div class="status-pill" style="background:${riskColor}">${item.conclusion.Action}</div>
+                        <div class="status-pill" style="background:${pillColor}">${action}</div>
                     </div>
                     <div class="item-content">
                         <div class="grid-data">
                             <div class="data-box"><span class="label">PER/PBR</span><span class="val">${item.ui_metrics.per_pbr}</span></div>
-                            <div class="data-box"><span class="label">RSI</span><span class="val">${item.ui_metrics.rsi}</span></div>
+                            <div class="data-box"><span class="label">RSI(14)</span><span class="val">${item.ui_metrics.rsi}</span></div>
                             <div class="data-box"><span class="label">PEG</span><span class="val">${item.ui_metrics.peg}</span></div>
                             <div class="data-box"><span class="label">OPM YoY</span><span class="val">${item.ui_metrics.opm_yoy}</span></div>
                             <div class="data-box"><span class="label">52주 고점 대비</span><span class="val">${item.ui_metrics.order_backlog}</span></div>
-                            <div class="data-box"><span class="label">스 머</span><span class="val">${item.ui_metrics.smart_money}</span></div>
+                            <div class="data-box"><span class="label">스마트 머니</span><span class="val">${item.ui_metrics.smart_money}</span></div>
                         </div>
-                        <div class="slider-container" style="margin-bottom:15px;">
-                            <span class="label" style="text-align:center">리스크 게이지 (${item.conclusion.Gauge_Bar}%)</span>
+
+                        <div class="slider-container">
+                            <span class="label" style="text-align:center">가치 평가 및 리스크 게이지 (${item.conclusion.Gauge_Bar}%)</span>
                             <div class="slider-track"><div class="slider-ptr" style="left:${item.conclusion.Gauge_Bar}%"></div></div>
+                            <div style="display:flex;justify-content:space-between;font-size:0.6rem"><span>Low Risk</span><span>High Risk</span></div>
                         </div>
-                        <div class="why-box"><strong>📝 AI 분석 논리:</strong><br>${item.reasoning.join('<br>')}</div>
-                        <div class="target-box">🎯 <b>비중 한도(Max Cap):</b> ${item.conclusion.Max_Weight}</div>
+
+                        <div class="why-box">
+                            <strong>📝 AI 분석 논리:</strong><br>
+                            ${item.reasoning.join('<br>')}
+                        </div>
+
+                        <div class="target-box target-buy">🎯 <b>비중 한도(Max Cap):</b> ${item.conclusion.Max_Weight}</div>
+                        
+                        <div style="display:flex; gap:8px; margin-top:10px;">
+                            <a href="https://search.naver.com/search.naver?query=${item.company_name}+주가" target="_blank" style="flex:1; text-align:center; font-size:0.7rem; padding:8px; border:1px solid var(--accent); color:var(--accent); text-decoration:none; border-radius:5px;">실시간 차트</a>
+                            <a href="https://dart.fss.or.kr/dsab001/main.do?textCrpNm=${item.company_name}" target="_blank" style="flex:1; text-align:center; font-size:0.7rem; padding:8px; border:1px solid var(--accent); color:var(--accent); text-decoration:none; border-radius:5px;">DART 공시</a>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
             });
 
-            // 4. Andon 비상 알림 배너 처리 (가장 최근 공정 기록 기준)
-            const lastEntry = history[history.length - 1];
-            if (lastEntry && lastEntry.plan_b_alerts && lastEntry.plan_b_alerts.length > 0) {
-                const banner = document.getElementById('andon-banner');
-                banner.style.display = 'block';
-                banner.innerHTML = "⚠️ <b>시스템 경고:</b> " + lastEntry.plan_b_alerts.join(" | ");
-            }
-            
-            if(lastEntry) {
-                document.getElementById('update-ts').innerText = "Last Analytics: " + new Date(lastEntry.timestamp).toLocaleString();
-            }
+            const lastUpdate = latestData[latestData.length - 1]?.timestamp;
+            if(lastUpdate) document.getElementById('update-time').innerText = "Last Updated: " + new Date(lastUpdate).toLocaleString();
 
         } catch (err) {
-            console.error("Dashboard Load Error:", err);
-            document.querySelectorAll('.empty-msg').forEach(el => el.innerText = "데이터 로드 실패. 분석 파일을 찾을 수 없거나 형식이 잘못되었습니다.");
+            console.error(err);
+            document.querySelectorAll('.empty-msg').forEach(el => el.innerText = "데이터 로드 실패. Actions 분석 로그를 확인하세요.");
         }
     }
 
-    // 페이지 로드 시 가동
-    document.addEventListener("DOMContentLoaded", loadAndRender);
+    document.addEventListener("DOMContentLoaded", loadDashboard);
 </script>
 </body>
 </html>
