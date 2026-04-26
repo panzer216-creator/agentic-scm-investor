@@ -7,11 +7,23 @@ class ParserAgent:
         sdp = {"tier_1": [], "tier_2": [], "tier_3": []}
         plan_b_flag = False
 
-        # 공시 데이터는 가장 순도 높은 Tier 1 자재로 분류
-        sdp["tier_1"].extend(raw_data.get("dart_list", []))
+        # [IQC 1차 검수] DART 데이터가 리스트가 아니면 폐기
+        dart_data = raw_data.get("dart_list", [])
+        if not isinstance(dart_data, list): 
+            dart_data = []
+        sdp["tier_1"].extend(dart_data)
+
+        # [IQC 2차 검수] 뉴스 데이터가 리스트가 아니면 폐기 (오늘의 에러 원인 해결)
+        news_data = raw_data.get("news_list", [])
+        if not isinstance(news_data, list): 
+            news_data = []
 
         # 뉴스 데이터 신뢰도 판별 로직
-        for news in raw_data.get("news_list", []):
+        for news in news_data:
+            # [IQC 3차 검수] 내부 부품이 딕셔너리가 아니면(알파벳 등) 스킵
+            if not isinstance(news, dict):
+                continue
+                
             title = news.get("title", "")
             source = news.get("source", "Unknown")
             
@@ -29,7 +41,6 @@ class ParserAgent:
 
         result = {"standard_data_pack": sdp}
         
-        # IQC 예외 상황 발생 시 알림 메타데이터 추가
         if plan_b_flag:
             result["iqc_warning"] = "🚨 [IQC Warning] 출처 식별 불가 데이터 감지. 안전을 위해 일부 데이터 Tier 2 일괄 강등."
             
