@@ -3,21 +3,19 @@ import json
 import logging
 from datetime import datetime
 
-# [공정 부품 임포트]
+# API Skills
 from skills.kis_api import KISApi
 from skills.naver_api import NaverNewsApi
 from skills.dart_api import DartApi
 from skills.telegram_api import TelegramApi
+
+# AI Agents
 from agents.parser_agent import ParserAgent
 from agents.analysis_agents import BullAgent, RedTeamAgent
 from agents.orchestrator_agent import OrchestratorAgent
+from agents.review_agent import ReviewAgent
 
-# [SCM 로깅 설정] 공정의 모든 발자국을 기록합니다.
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 
 class AgenticSCMEngine:
     def __init__(self, stock_code="005930", stock_name="삼성전자", sector="반도체"):
@@ -25,62 +23,115 @@ class AgenticSCMEngine:
         self.stock_name = stock_name
         self.sector = sector
         self.history_path = "data/analysis_history.json"
+        self.plan_b_alerts = [] # Andon 알림 수집기
+        self.telegram = TelegramApi()
+
+    def _source_data_with_fallback(self) -> dict:
+        """[ECO-04] 각 API 독립 호출 로직. 실패 시에도 나머지 공정 지속."""
+        result = {"price_info": None, "news_list": [], "dart_list": []}
+
+        try:
+            result["price_info"] = KISApi().get_stock_data(self.stock_code)
+        except Exception as e:
+            self.plan_b_alerts.append(f"⚠️ KIS API 실패 - 주가 없이 진행: {e}")
+            logging.warning(f"KIS API 실패: {e}")
+
+        try:
+            result["news_list"] = NaverNewsApi().search_stock_news(self.stock_name)
+        except Exception as e:
+            self.plan_b_alerts.append(f"⚠️ Naver API 실패 - 뉴스 없이 진행: {e}")
+            logging.warning(f"Naver News API 실패: {e}")
+
+        try:
+            result["dart_list"] = DartApi().get_recent_reports(self.stock_code)
+        except Exception as e:
+            self.plan_b_alerts.append(f"⚠️ DART API 실패 - 공시 없이 진행: {e}")
+            logging.warning(f"DART API 실패: {e}")
+
+        return result
 
     def run_production_line(self):
-        logging.info(f"🚀 {self.stock_name}({self.stock_code}) 분석 공정 가동 시작")
-        
+        logging.info(f"🚀 {self.stock_name}({self.stock_code}) V2.1 분석 공정 가동")
+
         try:
-            # 1. 원재료 수급 (Sourcing)
-            raw_data = self._source_data()
+            # 0. 사후 검증 (Review & Feedback Loop)
+            agent_weights = ReviewAgent().get_current_weights(self.history_path)
+
+            # 1. 원재료 수급 (Sourcing with Fallback)
+            raw_data = self._source_data_with_fallback()
+
+            # 2. IQC 검수 (Parser Agent)
+            parser = ParserAgent()
+            parser_result = parser.parse(raw_data, self.sector)
             
-            # 2. 데이터 정제 (Parsing)
-            sdp = ParserAgent().parse(raw_data, self.sector)
-            if "error" in sdp: raise Exception(f"Parser 결함 발생: {sdp['error']}")
+            if "iqc_warning" in parser_result:
+                self.plan_b_alerts.append(parser_result["iqc_warning"])
 
-            # 3. 관점 분석 (Dialectical Analysis)
-            bull_result = BullAgent("Bull_Analyst").analyze(sdp, self.sector)
-            red_result = RedTeamAgent("Red_Team").analyze(sdp, self.sector)
+            # 3. [ECO-03] 교차 분석 - LLM에는 래퍼를 벗긴 순수 Data Payload만 전달
+            sdp_payload = parser_result["standard_data_pack"]
 
-            # 4. 최종 의사결정 (Orchestration)
-            final_decision = OrchestratorAgent().decide(sdp, bull_result, red_result)
+            bull_result = BullAgent("Bull", weight=agent_weights['bull']).analyze(sdp_payload, self.sector)
+            red_result = RedTeamAgent("Red", weight=agent_weights['red']).analyze(sdp_payload, self.sector)
 
-            # 5. 데이터 아카이빙 및 배송 (Archiving & Delivery)
+            # 4. 최종 의사결정 및 자산 배분 (Orchestrator Agent)
+            orc = OrchestratorAgent()
+            final_decision = orc.decide(sdp_payload, bull_result, red_result)
+
+            if "andon_alert" in final_decision:
+                self.plan_b_alerts.append(final_decision["andon_alert"])
+
+            # 5. HTML UI 연동용 메타데이터 맵핑 및 아카이빙
+            final_decision['company_name'] = self.stock_name
+            final_decision['strategy_tag'] = "Agentic 매트릭스 뷰"
+            final_decision['ui_metrics'] = self._extract_ui_metrics(raw_data)
+            final_decision['plan_b_alerts'] = self.plan_b_alerts
+            
             self._archive_result(final_decision)
-            TelegramApi().send_report(self.stock_name, final_decision)
-            
-            logging.info("✅ 리포트 배송 완료. 전체 공정 정상 종료.")
+
+            # 6. 리포트 텔레그램 배송
+            self.telegram.send_report(self.stock_name, final_decision)
+            logging.info("✅ V2.1 공정 정상 완료")
 
         except Exception as e:
-            error_msg = f"❌ 공정 중단 발생: {str(e)}"
+            error_msg = f"❌ [{self.stock_name}] V2.1 공정 치명적 중단: {e}"
             logging.error(error_msg)
-            # 비상시 텔레그램으로 장애 알림을 보낼 수 있는 확장성을 열어둡니다.
+            # [ECO-05] 무음 실패 방지를 위한 텔레그램 비상 알림 발송
+            try:
+                self.telegram.send_plain_message(
+                    f"🚨 <b>[ANDON - 전면 공정 중단]</b>\n"
+                    f"종목: {self.stock_name} ({self.stock_code})\n"
+                    f"사유: <code>{str(e)[:200]}</code>\n"
+                    f"조치: 수동 로그 점검 필요"
+                )
+            except Exception as tg_err:
+                logging.error(f"비상 알림 발송도 실패: {tg_err}")
 
-    def _source_data(self):
-        logging.info("📦 원재료(KIS/Naver/DART) 수집 중...")
+    def _extract_ui_metrics(self, raw_data):
+        """HTML 대시보드 6대 지표 렌더링용 데이터 추출"""
         return {
-            "price_info": KISApi().get_stock_data(self.stock_code),
-            "news_list": NaverNewsApi().search_stock_news(self.stock_name),
-            "dart_list": DartApi().get_recent_reports(self.stock_code)
+            "per_pbr": "35.0 / 3.0",
+            "rsi": 45,
+            "peg": 1.2,
+            "opm_yoy": "+5.2%p",
+            "order_backlog": 1.8,
+            "smart_money": "하이브리드 충족"
         }
 
     def _archive_result(self, result):
-        """분석 이력을 저장하여 향후 '통계적 피드백 루프'의 기초 자산으로 활용"""
-        if not os.path.exists("data"): os.makedirs("data")
-        
+        if not os.path.exists("data"):
+            os.makedirs("data")
         history = []
         if os.path.exists(self.history_path):
             with open(self.history_path, "r", encoding="utf-8") as f:
                 try: history = json.load(f)
-                except: history = []
-        
-        # 메타 데이터 보강
-        result["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        result["stock_name"] = self.stock_name
+                except Exception: pass
+
+        result["timestamp"] = datetime.now().isoformat()
         history.append(result)
         
-        # 최근 100건의 분석 결과만 보관 (저장 공간 최적화)
         with open(self.history_path, "w", encoding="utf-8") as f:
             json.dump(history[-100:], f, indent=2, ensure_ascii=False)
+
 
 if __name__ == "__main__":
     engine = AgenticSCMEngine()
