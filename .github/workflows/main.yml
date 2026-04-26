@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # 2026년 표준 안정 버전으로 업그레이드
+          python-version: '3.11' # 2026년 표준 버전
 
       - name: Install dependencies
         run: |
