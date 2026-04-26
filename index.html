@@ -3,181 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>산업 병목 추적 & 투자 매트릭스 v2.2</title>
+    <title>Agentic SCM Investor Dashboard v2.2</title>
     <style>
         :root {
-            --primary: #2c3e50; --accent: #e67e22; --bg: #f5f7fa;
-            --card: #ffffff; --border: #dcdde1; --text: #2f3640;
-            --strong-buy: #eb4d4b; --buy: #2ecc71; --wait: #95a5a6;
-            --box-bg: #f9f9f9; --why-bg: #ecf0f1; --th-bg: #f8f9fa;
-            --target-buy-bg: #e8f8f5; --target-sell-bg: #fdedec;
+            --bg-dark: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --border-color: #333333;
+            --buy-color: #d32f2f;
+            --buy-light: #ff6659;
+            --wait-color: #555555;
+            --accent-blue: #1976d2;
         }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --primary: #74b9ff; --accent: #fdcb6e; --bg: #1e272e;
-                --card: #2d3436; --border: #4a4a4a; --text: #dfe6e9;
-                --box-bg: #353b48; --why-bg: #2d3436; --th-bg: #2d3436;
-                --target-buy-bg: rgba(46, 204, 113, 0.15); --target-sell-bg: rgba(235, 77, 75, 0.15);
-            }
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); padding: 15px; line-height: 1.5; }
-        .container { max-width: 1100px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary); padding-bottom: 15px; }
-        .header h1 { font-size: 1.4rem; color: var(--primary); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 1.8em; }
+        .header .subtitle { font-size: 0.9em; color: var(--text-sub); }
         
-        .info-box { background: var(--card); border: 1px solid var(--border); border-left: 5px solid var(--primary); border-radius: 8px; padding: 15px; margin-bottom: 25px; font-size: 0.85rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .group-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 30px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .group-header h2 { font-size: 1.2rem; color: var(--primary); border-left: 6px solid var(--accent); padding-left: 10px; margin-bottom: 10px; }
-
-        /* Item Row Design (v3.5 복원) */
-        .item-row { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--card); margin-bottom: 10px; }
-        .item-top { display: flex; justify-content: space-between; align-items: center; padding: 15px; cursor: pointer; transition: background 0.2s; }
-        .item-top:hover { background: var(--box-bg); }
-        .corp-name { font-weight: bold; font-size: 1.05rem; }
-        .status-pill { font-size: 0.75rem; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; }
-
-        /* Accordion Logic */
-        .item-content { display: none; padding: 15px; background: var(--box-bg); border-top: 1px solid var(--border); }
-        .item-content.active { display: block; animation: slideDown 0.3s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid var(--border-color); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
+        .stock-title { font-size: 1.4em; font-weight: bold; }
+        .stock-sector { font-size: 0.8em; color: var(--text-sub); margin-left: 10px; }
         
-        /* Grid Data (6 Metrics) */
-        .grid-data { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-        .data-box { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 6px; text-align: center; }
-        .label { font-size: 0.6rem; color: var(--wait); display: block; margin-bottom: 2px; }
-        .val { font-size: 0.85rem; font-weight: bold; color: var(--primary); }
-
-        /* Slider */
-        .slider-track { height: 8px; background: linear-gradient(to right, var(--buy) 0%, #f1c40f 50%, var(--strong-buy) 100%); border-radius: 4px; position: relative; margin: 12px 0; }
-        .slider-ptr { width: 4px; height: 16px; background: var(--text); position: absolute; top: -4px; border: 1px solid #fff; transition: left 1s ease; }
+        .action-badge { padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9em; }
+        .action-buy { background-color: var(--buy-color); color: white; }
+        .action-wait { background-color: var(--wait-color); color: white; }
         
-        /* Content Boxes */
-        .why-box { background: var(--why-bg); padding: 12px; border-radius: 8px; font-size: 0.8rem; border-left: 4px solid var(--primary); margin-bottom: 15px; }
-        .target-box { padding: 10px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 6px; border: 1px solid var(--border); }
-        .target-buy { background: var(--target-buy-bg); border-left: 4px solid var(--buy); }
-        .target-sell { background: var(--target-sell-bg); border-left: 4px solid var(--strong-buy); }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .metric-box { background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #2a2a2a; }
+        .metric-label { font-size: 0.75em; color: var(--text-sub); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-value { font-size: 1.1em; font-weight: bold; color: #fff; }
+        .metric-highlight { color: var(--buy-light); }
+        
+        .reasoning-box { background-color: rgba(25, 118, 210, 0.05); border-left: 4px solid var(--accent-blue); padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
+        .reasoning-title { font-size: 0.9em; font-weight: bold; margin-bottom: 8px; color: var(--accent-blue); }
+        .reasoning-text { font-size: 0.9em; line-height: 1.6; color: #ddd; margin: 0; }
+        
+        .weight-box { display: flex; align-items: center; justify-content: space-between; background-color: rgba(46, 125, 50, 0.1); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(46, 125, 50, 0.3); }
+        .weight-label { font-weight: bold; color: #81c784; font-size: 0.9em; }
+        .weight-value { font-weight: bold; font-size: 1.1em; }
+        
+        .footer-info { font-size: 0.75em; color: #666; text-align: right; margin-top: 10px; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <header class="header">
-        <h1>🏗️ 산업 병목 추적 & 투자 매트릭스 v2.2</h1>
-        <p id="status-msg" style="font-size: 0.65rem; color: var(--accent); margin-top:5px;">시스템 초기화 중...</p>
-    </header>
-
-    <div class="info-box">
-        <b>🚦 운영 상태:</b> 실제 분석 데이터(JSON)가 없거나 로드 중일 때는 <b>샘플 리포트</b>가 출력됩니다. 각 종목을 클릭하여 아코디언 기능을 테스트하세요.
-    </div>
-
-    <div id="section-a" class="group-card">
-        <div class="group-header"><h2>A. 디지털 고도화 (HBM/AI)</h2></div>
-        <div id="list-a" class="item-list"></div>
-    </div>
-    <div id="section-b" class="group-card">
-        <div class="group-header"><h2>B. 물리적 인프라 (전력/변압기)</h2></div>
-        <div id="list-b" class="item-list"></div>
-    </div>
-    <div id="section-c" class="group-card">
-        <div class="group-header"><h2>C. 글로벌 패권 (방산/자원)</h2></div>
-        <div id="list-c" class="item-list"></div>
-    </div>
-    <div id="section-d" class="group-card">
-        <div class="group-header"><h2>D. 조선/중공업 (OPEX)</h2></div>
-        <div id="list-d" class="item-list"></div>
-    </div>
-</div>
-
-<script>
-    // 💡 아코디언 토글 전역 함수
-    function toggleItem(el) {
-        const content = el.nextElementSibling;
-        content.classList.toggle('active');
-    }
-
-    // 💡 샘플 데이터 (데이터가 없을 때 UI 가시성 확보용)
-    const mockData = [
-        {
-            company_name: "인텍플러스 (샘플)", group_id: "list-a", strategy_tag: "HOT 수혜",
-            conclusion: { Action: "강력 매수", Gauge_Bar: 35, Max_Weight: "20%" },
-            ui_metrics: { per_pbr: "48.0 / 2.5", rsi: 52, peg: 1.1, opm_yoy: "+6.3%p", order_backlog: "1.5", smart_money: "매집 진행" },
-            reasoning: ["HBM 테스트 소켓 수요 폭증 구간 진입", "수율 안정화에 따른 고마진 사이클 초입"]
-        },
-        {
-            company_name: "HD현대일렉트릭 (샘플)", group_id: "list-b", strategy_tag: "인프라 대장",
-            conclusion: { Action: "강력 매수", Gauge_Bar: 65, Max_Weight: "15%" },
-            ui_metrics: { per_pbr: "30.1 / 5.2", rsi: 65, peg: 1.2, opm_yoy: "+4.5%p", order_backlog: "3.8", smart_money: "하이브리드 충족" },
-            reasoning: ["북미 변압기 쇼티지 지속 수혜", "역대급 수주잔고 기반 실적 퀀텀점프"]
-        }
-    ];
-
-    function createItemHTML(item) {
-        const pillColor = item.conclusion.Action.includes('매수') ? 'var(--strong-buy)' : 'var(--buy)';
-        return `
-            <div class="item-row">
-                <div class="item-top" onclick="toggleItem(this)">
-                    <div class="corp-name">${item.company_name} <span style="font-size:0.6rem; color:var(--accent)">[${item.strategy_tag}]</span></div>
-                    <div class="status-pill" style="background:${pillColor}">${item.conclusion.Action}</div>
-                </div>
-                <div class="item-content">
-                    <div class="grid-data">
-                        <div class="data-box"><span class="label">PER/PBR</span><span class="val">${item.ui_metrics.per_pbr}</span></div>
-                        <div class="data-box"><span class="label">RSI(14)</span><span class="val">${item.ui_metrics.rsi}</span></div>
-                        <div class="data-box"><span class="label">PEG</span><span class="val">${item.ui_metrics.peg}</span></div>
-                        <div class="data-box"><span class="label">OPM YoY</span><span class="val">${item.ui_metrics.opm_yoy}</span></div>
-                        <div class="data-box"><span class="label">수주잔고비율</span><span class="val">${item.ui_metrics.order_backlog}</span></div>
-                        <div class="data-box"><span class="label">스마트 머니</span><span class="val">${item.ui_metrics.smart_money}</span></div>
-                    </div>
-                    <div class="slider-container">
-                        <span class="label" style="text-align:center">리스크 게이지 (${item.conclusion.Gauge_Bar}%)</span>
-                        <div class="slider-track"><div class="slider-ptr" style="left:${item.conclusion.Gauge_Bar}%"></div></div>
-                    </div>
-                    <div class="why-box"><strong>📝 분석 논리:</strong><br>${item.reasoning.join('<br>')}</div>
-                    <div class="target-box target-buy">🎯 <b>비중 가이드:</b> Max ${item.conclusion.Max_Weight}</div>
-                </div>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🚢 Agentic SCM Pipeline</h1>
+                <div class="subtitle">공급망 병목 & 밸류에이션 하이브리드 분석 대시보드</div>
             </div>
-        `;
-    }
+            <div class="subtitle" id="last-update-time">데이터 불러오는 중...</div>
+        </div>
 
-    async function initDashboard() {
-        const statusEl = document.getElementById('status-msg');
-        try {
-            const response = await fetch('./data/analysis_history.json');
-            let data = [];
-            
-            if (response.ok) {
-                const history = await response.json();
-                if (history && history.length > 0) {
-                    // 최신 데이터 맵 구성
-                    const latestMap = new Map();
-                    history.forEach(item => latestMap.set(item.company_name, item));
-                    data = Array.from(latestMap.values());
-                    statusEl.innerText = "🟢 실시간 데이터 연동 완료 (" + new Date().toLocaleTimeString() + ")";
+        <div id="dashboard-content">
+            <p style="text-align: center; color: #888;">📈 GitHub 저장소에서 최신 분석 데이터를 로드하고 있습니다...</p>
+        </div>
+    </div>
+
+    <script>
+        // GitHub Pages의 JSON 데이터를 비동기로 불러와 화면에 렌더링
+        async function fetchAndRenderData() {
+            try {
+                // 캐시 방지를 위해 쿼리 파라미터 추가
+                const response = await fetch('data/analysis_history.json?t=' + new Date().getTime());
+                if (!response.ok) throw new Error('데이터를 찾을 수 없습니다.');
+                
+                const data = await response.json();
+                const contentDiv = document.getElementById('dashboard-content');
+                contentDiv.innerHTML = ''; // 로딩 메시지 제거
+
+                if (data.length === 0) {
+                    contentDiv.innerHTML = '<p style="text-align: center; color: #888;">아직 분석된 데이터가 없습니다.</p>';
+                    return;
                 }
+
+                // 최신 분석 시간 업데이트
+                document.getElementById('last-update-time').innerText = `최종 업데이트: ${new Date(data[data.length-1].timestamp).toLocaleString()}`;
+
+                // 최신순으로 정렬하여 렌더링
+                data.reverse().forEach(item => {
+                    const metrics = item.ui_metrics || {};
+                    const conc = item.conclusion || {};
+                    const action = conc.Action || '관망';
+                    const badgeClass = action.includes('매수') ? 'action-buy' : 'action-wait';
+                    
+                    // 논리 배열을 텍스트로 합치기
+                    let reasoningHtml = '';
+                    if (Array.isArray(item.reasoning)) {
+                        reasoningHtml = item.reasoning.map(r => `<div>${r}</div>`).join('<br>');
+                    } else {
+                        reasoningHtml = item.reasoning || '분석 논리 없음';
+                    }
+
+                    const cardHtml = `
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <span class="stock-title">${item.company_name}</span>
+                                    <span class="stock-sector">[${item.stock_code}]</span>
+                                </div>
+                                <span class="action-badge ${badgeClass}">${action}</span>
+                            </div>
+                            
+                            <div class="metrics-grid">
+                                <div class="metric-box">
+                                    <div class="metric-label">PER / PBR</div>
+                                    <div class="metric-value">${metrics.per_pbr || 'N/A'}</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">RSI(14)</div>
+                                    <div class="metric-value ${metrics.rsi < 40 ? 'metric-highlight' : ''}">${metrics.rsi || 'N/A'}</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">RS Score</div>
+                                    <div class="metric-value ${metrics.rs_score > 1.0 ? 'metric-highlight' : ''}">${metrics.rs_score || 'N/A'}</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">재고회전율</div>
+                                    <div class="metric-value">${metrics.inv_turnover || 'N/A'}</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Smart Money</div>
+                                    <div class="metric-value">${metrics.smart_money || 'N/A'}</div>
+                                </div>
+                            </div>
+
+                            <div class="reasoning-box">
+                                <div class="reasoning-title">📝 SCM & 퀀트 분석 논리</div>
+                                <div class="reasoning-text">${reasoningHtml}</div>
+                            </div>
+
+                            <div class="weight-box">
+                                <span class="weight-label">🎯 편입 가이드 (Max Weight)</span>
+                                <span class="weight-value">${conc.Max_Weight || '0%'}</span>
+                            </div>
+                            
+                            <div class="footer-info">
+                                AI Engines: ${item.produced_by} | Group: ${item.group_id}
+                            </div>
+                        </div>
+                    `;
+                    contentDiv.innerHTML += cardHtml;
+                });
+
+            } catch (error) {
+                document.getElementById('dashboard-content').innerHTML = `<p style="color: #d32f2f; text-align: center;">데이터 로드 중 오류가 발생했습니다: ${error.message}</p>`;
             }
-            
-            // 데이터가 없으면 샘플 데이터 사용
-            const finalData = data.length > 0 ? data : mockData;
-            if (data.length === 0) statusEl.innerText = "🟡 실시간 데이터 대기 중 (샘플 모드 가동)";
-
-            // 렌더링 루프
-            finalData.forEach(item => {
-                const listId = item.group_id || 'list-a';
-                const container = document.getElementById(listId);
-                if (container) container.innerHTML += createItemHTML(item);
-            });
-
-        } catch (err) {
-            console.error("Data Load Error:", err);
-            statusEl.innerText = "🔴 연결 오류: 샘플 데이터를 표시합니다.";
-            mockData.forEach(item => {
-                document.getElementById(item.group_id).innerHTML += createItemHTML(item);
-            });
         }
-    }
 
-    document.addEventListener("DOMContentLoaded", initDashboard);
-</script>
+        // 페이지 로드 시 즉시 실행
+        window.onload = fetchAndRenderData;
+    </script>
 </body>
 </html>
