@@ -37,5 +37,140 @@
       "🚨 [IQC Warning] 출처 식별 불가 데이터 감지. 안전을 위해 일부 데이터 Tier 2 일괄 강등."
     ],
     "timestamp": "2026-04-26T14:03:37.998944"
+  },
+  {
+    "conclusion": {
+      "Action": "전면 매도 또는 관망",
+      "Max_Weight": "5%",
+      "Gauge_Bar": 80
+    },
+    "reasoning": [
+      "Red Team 산출 리스크: 8.0/10",
+      "안전 재고 알고리즘에 따른 기계적 한도 통제 적용"
+    ],
+    "company_name": "삼성전자",
+    "group_id": "list-a",
+    "strategy_tag": "ETF 동적 수급 (LIST-A)",
+    "ui_metrics": {
+      "per_pbr": "분석중",
+      "rsi": 50,
+      "peg": 1.0,
+      "opm_yoy": "분석중",
+      "order_backlog": "N/A",
+      "smart_money": "수급 체크중"
+    },
+    "plan_b_alerts": [
+      "🔴 휴장일입니다. 마지막 종가 기준으로 공정을 가동합니다.",
+      "🚨 [IQC Warning] 출처 식별 불가 데이터 감지. 안전을 위해 일부 데이터 Tier 2 일괄 강등."
+    ],
+    "timestamp": "2026-04-26T14:15:32.404495"
+  },
+  {
+    "conclusion": {
+      "Action": "비중 축소 (현금 안전재고 확보)",
+      "Max_Weight": "15%",
+      "Gauge_Bar": 70
+    },
+    "reasoning": [
+      "Red Team 산출 리스크: 7.0/10",
+      "안전 재고 알고리즘에 따른 기계적 한도 통제 적용"
+    ],
+    "company_name": "SK하이닉스",
+    "group_id": "list-a",
+    "strategy_tag": "ETF 동적 수급 (LIST-A)",
+    "ui_metrics": {
+      "per_pbr": "분석중",
+      "rsi": 50,
+      "peg": 1.0,
+      "opm_yoy": "분석중",
+      "order_backlog": "-3.55%",
+      "smart_money": "수급 체크중"
+    },
+    "plan_b_alerts": [
+      "🔴 휴장일입니다. 마지막 종가 기준으로 공정을 가동합니다.",
+      "🚨 [IQC Warning] 출처 식별 불가 데이터 감지. 안전을 위해 일부 데이터 Tier 2 일괄 강등."
+    ],
+    "timestamp": "2026-04-26T14:16:29.313135"
+  },
+  {
+    "conclusion": {
+      "Action": "전면 매도 또는 관망",
+      "Max_Weight": "5%",
+      "Gauge_Bar": 80
+    },
+    "reasoning": [
+      "Red Team 산출 리스크: 8.0/10",
+      "안전 재고 알고리즘에 따른 기계적 한도 통제 적용"
+    ],
+    "company_name": "인텍플러스",
+    "group_id": "list-a",
+    "strategy_tag": "ETF 동적 수급 (LIST-A)",
+    "ui_metrics": {
+      "per_pbr": "분석중",
+      "rsi": 50,
+      "peg": 1.0,
+      "opm_yoy": "분석중",
+      "order_backlog": "N/A",
+      "smart_money": "수급 체크중"
+    },
+    "plan_b_alerts": [
+      "🔴 휴장일입니다. 마지막 종가 기준으로 공정을 가동합니다.",
+      "🚨 [IQC Warning] 출처 식별 불가 데이터 감지. 안전을 위해 일부 데이터 Tier 2 일괄 강등."
+    ],
+    "timestamp": "2026-04-26T14:17:17.939708"
+  },
+  {
+    "conclusion": {
+      "Action": "전면 매도 또는 관망",
+      "Max_Weight": "5%",
+      "Gauge_Bar": 80
+    },
+    "reasoning": [
+      "Red Team 산출 리스크: 8.0/10",
+      "안전 재고 알고리즘에 따른 기계적 한도 통제 적용"
+    ],
+    "company_name": "HD현대일렉트릭",
+    "group_id": "list-b",
+    "strategy_tag": "ETF 동적 수급 (LIST-B)",
+    "ui_metrics": {
+      "per_pbr": "분석중",
+      "rsi": 50,
+      "peg": 1.0,
+      "opm_yoy": "분석중",
+      "order_backlog": "N/A",
+      "smart_money": "수급 체크중"
+    },
+    "plan_b_alerts": [
+      "🔴 휴장일입니다. 마지막 종가 기준으로 공정을 가동합니다.",
+      "🚨 [IQC Warning] 출처 식별 불가 데이터 감지. 안전을 위해 일부 데이터 Tier 2 일괄 강등."
+    ],
+    "timestamp": "2026-04-26T14:18:10.505844"
+  },
+  {
+    "conclusion": {
+      "Action": "비중 축소 (현금 안전재고 확보)",
+      "Max_Weight": "15%",
+      "Gauge_Bar": 60
+    },
+    "reasoning": [
+      "Red Team 산출 리스크: 6.0/10",
+      "안전 재고 알고리즘에 따른 기계적 한도 통제 적용"
+    ],
+    "company_name": "대룡전기",
+    "group_id": "list-b",
+    "strategy_tag": "ETF 동적 수급 (LIST-B)",
+    "ui_metrics": {
+      "per_pbr": "분석중",
+      "rsi": 50,
+      "peg": 1.0,
+      "opm_yoy": "분석중",
+      "order_backlog": "N/A",
+      "smart_money": "수급 체크중"
+    },
+    "plan_b_alerts": [
+      "🔴 휴장일입니다. 마지막 종가 기준으로 공정을 가동합니다.",
+      "🚨 [IQC Warning] 출처 식별 불가 데이터 감지. 안전을 위해 일부 데이터 Tier 2 일괄 강등."
+    ],
+    "timestamp": "2026-04-26T14:19:05.325635"
   }
 ]
