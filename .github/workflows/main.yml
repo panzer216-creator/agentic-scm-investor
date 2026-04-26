@@ -1,1 +1,50 @@
-run: python skills/naver_api.py
+name: Agentic SCM Investor Pipeline
+
+on:
+  # 1. 수동 실행 (테스트 및 긴급 분석용)
+  workflow_dispatch:
+  
+  # 2. 정기 실행 (한국 시간 오전 7시 / UTC 22시)
+  schedule:
+    - cron: '0 22 * * *'
+
+jobs:
+  analyze_market:
+    runs-on: ubuntu-latest
+    # GitHub에 결과물을 다시 커밋하기 위한 권한 설정
+    permissions:
+      contents: write
+
+    steps:
+      # [공정 1] 코드 내려받기
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # [공정 2] 파이썬 환경 구축 (3.10 버전)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # [공정 3] 필수 라이브러리 설치
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # [공정 4] 스킬 모듈 검증 (현재는 네이버 뉴스 API 타겟)
+      - name: Run Skill Module Test
+        env:
+          # 핵심 엔진 (Gemini)
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # 데이터 공급망 (KIS, Naver, DART)
+          KIS_API_KEY: ${{ secrets.KIS_API_KEY }}
+          KIS_SECRET_KEY: ${{ secrets.KIS_SECRET_KEY }}
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          # 알림 채널 (Telegram)
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        # 💡 테스트하고자 하는 파일 경로로 수정하며 검증 가능합니다.
+        run: python skills/naver_api.py
