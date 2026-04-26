@@ -1,1 +1,122 @@
-[]
+[
+  {
+    "stock_code": "005930",
+    "company_name": "삼성전자",
+    "group_id": "list-a",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 45,
+      "Max_Weight": "5%"
+    },
+    "reasoning": [
+      "[Bull] 반도체 부문 노조 파업 예고로 인해 수십조 원 규모의 경제적 손실과 더불어 소부장 생태계 전반에 걸친 공급망(SCM) 훼손 우려가 제기되고 있습니다. 이는 고객사 신뢰도 하락 및 대만 등 경쟁사의 반사이익으로 이어져 핵심 사업의 시장 지배력 약화 리스크로 작용할 수 있습니다.",
+      "[Red] 삼성전자 노조 파업으로 인한 평택 반도체 공장 생산 차질은 단순한 재무적 손실을 넘어 국내 소부장 생태계 전반의 연쇄 붕괴를 촉발할 수 있는 치명적 공급망 병목 리스크입니다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "N/A / N/A",
+      "rsi": 50,
+      "peg": 1.0,
+      "order_backlog": "N/A",
+      "last_analyzed_price": 0
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-26T22:43:30.630534"
+  },
+  {
+    "stock_code": "000660",
+    "company_name": "SK하이닉스",
+    "group_id": "list-a",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "적극 매수",
+      "Gauge_Bar": 20,
+      "Max_Weight": "20%"
+    },
+    "reasoning": [
+      "[Bull] 우수 인재 확보를 통한 장기적 R&D 역량 강화: 주요 대학과의 반도체 계약학과 입시 경쟁률이 역대 최고치를 기록하며 우수 인재가 집중적으로 유입되고 있습니다. 이는 인적 자원 공급망(SCM)의 핵심인 '인재 파이프라인'을 탄탄하게 구축하여 장기적인 기술 초격차를 유지할 수 있는 강력한 기반이 됩니다.",
+      "[Red] 반도체 계약학과의 비정상적인 인기와 성과급 기대감은 향후 산업 다운사이클 진입 시 심각한 노무 리스크로 돌변할 수 있다. 막대한 고정 인건비 부담과 기대 수익 미충족 시 핵심 인재의 대규모 이탈 및 파업이 발생할 최악의 시나리오가 존재한다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "N/A / N/A",
+      "rsi": 50,
+      "peg": 1.0,
+      "order_backlog": "N/A",
+      "last_analyzed_price": 0
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-26T22:44:04.089865"
+  },
+  {
+    "stock_code": "052400",
+    "company_name": "인텍플러스",
+    "group_id": "list-a",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "적극 매수",
+      "Gauge_Bar": 15,
+      "Max_Weight": "20%"
+    },
+    "reasoning": [
+      "[Bull] 글로벌 1위 파운드리 업체와의 FC-BGA 기판 검사장비 공급 계약 체결과 인텔과의 차세대 유리기판 검사장비 공동 R&D는 동사의 압도적인 기술력을 증명하며, 최상위 고객사 확보를 통해 SCM(공급망 관리)의 수요 안정성과 글로벌 벤더로서의 입지를 확고히 다졌습니다.",
+      "[Red] 이차전지 장비 비중을 줄이고 반도체 검사장비로 포트폴리오를 집중하는 것은 반도체 업황 다운사이클 진입 시 매출 방어막이 완전히 사라지는 치명적인 구조적 취약성을 낳습니다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "N/A / N/A",
+      "rsi": 50,
+      "peg": 1.0,
+      "order_backlog": "N/A",
+      "last_analyzed_price": 0
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-26T22:44:42.623065"
+  },
+  {
+    "stock_code": "010620",
+    "company_name": "HD현대일렉트릭",
+    "group_id": "list-b",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "적극 매수",
+      "Gauge_Bar": 15,
+      "Max_Weight": "20%"
+    },
+    "reasoning": [
+      "[Bull] HD현대일렉트릭은 400kV 460MVA급 초대형 친환경 변압기 제작 및 최종 승인 시험을 통과하며 고전압 및 대용량 전력기기 부문에서 독보적인 기술력과 생산 역량(SCM 강점)을 입증했습니다. 이는 연평균 6.9% 성장하는 유럽 친환경 전력기기 시장에서 강력한 시장 지배력 확대로 이어질 것입니다.",
+      "[Red] 중동 지정학적 리스크의 과소평가: 언론은 중동 프로젝트의 지연을 '소폭 조정'으로 치부하며 낙관하고 있으나, 최악의 시나리오에서는 확전으로 인한 전면적인 프로젝트 취소, 대규모 매몰 비용 발생 및 중동발 매출의 완전한 증발 가능성이 농후합니다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "N/A / N/A",
+      "rsi": 50,
+      "peg": 1.0,
+      "order_backlog": "N/A",
+      "last_analyzed_price": 0
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-26T22:45:21.525982"
+  },
+  {
+    "stock_code": "069620",
+    "company_name": "대룡전기",
+    "group_id": "list-b",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 40,
+      "Max_Weight": "5%"
+    },
+    "reasoning": [
+      "[Bull] 대룡해운의 휴항으로 인해 주요 전기 및 전자업계의 수출입 화물 수송에 차질이 발생하고 있다는 보도는 전력기기 섹터 전반의 SCM(공급망 관리) 및 물류 리스크가 확대되고 있음을 시사합니다.",
+      "[Red] 대룡해운 영업 중단으로 인한 평택항 물류 셧다운은 전력기기 및 전자업계의 핵심 수출입 공급망에 치명적인 병목 현상을 초래하며 최악의 경우 부품 조달 실패와 납기 지연에 따른 대규모 지체상금 발생 및 주요 고객사 이탈로 이어질 수 있습니다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "N/A / N/A",
+      "rsi": 50,
+      "peg": 1.0,
+      "order_backlog": "N/A",
+      "last_analyzed_price": 0
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-26T22:45:59.153091"
+  }
+]
