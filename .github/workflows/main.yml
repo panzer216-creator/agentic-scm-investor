@@ -18,14 +18,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11' # 2026년 표준 안정 버전으로 업그레이드
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # [최종 통합 공정] 데이터 수집부터 Parser 큐레이션까지 한 번에 검증
       - name: Run Integrated Pipeline Test
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
