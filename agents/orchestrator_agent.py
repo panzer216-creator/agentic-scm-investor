@@ -1,50 +1,43 @@
-import os
-import json
-import time
-from google import genai
-from google.genai import types
-
 class OrchestratorAgent:
-    def __init__(self):
-        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-        self.model_tiers = [
-            "gemini-3.1-pro-preview", # 최종 의사결정은 가장 똑똑한 모델이 담당
-            "gemini-1.5-pro",
-            "gemini-3-flash-preview"
-        ]
+    def decide(self, sdp_payload, bull_result, red_result):
+        
+        # 1. Red Team의 리스크 스코어 안전 추출
+        try:
+            risk_score = float(red_result.get("risk_score", 5))
+            is_valid_score = True
+        except (ValueError, TypeError):
+            risk_score = 10  # 파싱 실패 시 자산 보호를 위해 최악의 리스크로 가정
+            is_valid_score = False
 
-    def decide(self, sdp, bull_result, red_result):
-        system_instruction = """당신은 투자 의사결정 위원회(Orchestrator)입니다. 
-        성장론자(Bull)와 리스크 관리자(Red Team)의 보고서를 대조하여 최종 투자 의견을 도출하세요.
+        # 2. SCM 안전 재고 기반 자산 배분(Max Cap) 룰베이스
+        if risk_score >= 8.0:
+            target_weight = 5
+            action = "전면 매도 또는 관망"
+        elif risk_score >= 5.0:
+            target_weight = 15
+            action = "비중 축소 (현금 안전재고 확보)"
+        else:
+            target_weight = 30
+            action = "매수 가능 구간"
 
-        [수행 지침]
-        1. 양측의 논리 중 '데이터 팩(SDP)'에 근거한 팩트가 무엇인지 가려내세요.
-        2. Bull의 낙관론이 과한지, Red Team의 공포가 실질적인지 중재하세요.
-        3. '왜' 이런 결론에 도달했는지에 대한 논리적 사고 과정을 반드시 먼저 설명하세요.
-        4. 최종 결론은 'Action', 'Target_Weight', 'Key_Monitoring_Point'를 포함해야 합니다.
+        # 3. HTML UI 게이지 연동을 위한 100분위 스케일 변환
+        gauge_value = int((risk_score / 10.0) * 100)
 
-        [출력 형식] JSON format only.
-        """
-
-        context = {
-            "standard_data_pack": sdp,
-            "bull_report": bull_result,
-            "red_team_report": red_result
+        decision = {
+            "conclusion": {
+                "Action": action,
+                "Max_Weight": f"{target_weight}%",
+                "Gauge_Bar": gauge_value
+            },
+            "reasoning": [
+                f"Red Team 산출 리스크: {risk_score}/10",
+                "안전 재고 알고리즘에 따른 기계적 한도 통제 적용"
+            ]
         }
 
-        for model_id in self.model_tiers:
-            try:
-                response = self.client.models.generate_content(
-                    model=model_id,
-                    contents=f"최종 중재 및 의사결정 시작: {json.dumps(context, ensure_ascii=False)}",
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_instruction,
-                        response_mime_type="application/json"
-                    )
-                )
-                return json.loads(response.text)
-            except Exception as e:
-                print(f"⚠️ Orchestrator ({model_id}) 실패: {e}")
-                time.sleep(2)
-        
-        return {"error": "최종 의사결정 공정 가동 실패"}
+        # 4. 수치 연산 실패에 따른 Plan B 가동 여부 체킹
+        if not is_valid_score:
+            decision["conclusion"]["Max_Weight"] = "0% (강제 방어)"
+            decision["andon_alert"] = "🚨 [Allocation Warning] 리스크 수치 산출 오류 발생. 자산 보호를 위해 '비중 0% 강제 락오프' 적용."
+
+        return decision
