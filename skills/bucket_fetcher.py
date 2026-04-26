@@ -53,3 +53,5 @@ class BucketFetcher:
         except Exception as e:
             logging.error(f"❌ 유니버스 조달 실패: {e}")
             return {}
+
+
