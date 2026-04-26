@@ -9,9 +9,10 @@ class ParserAgent:
         self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         # SCM 전략: Plan A(고속) -> Plan B(고정밀) -> Plan C(비상 안정)
         self.model_tiers = [
-            "gemini-3.1-flash",      # Plan A: 최우선 고속 공정
-            "gemini-3.1-pro-preview", # Plan B: 고난도 추론 보완
-            "gemini-2.5-pro"         # Plan C: 검증된 안정 모델 (Safety Stock)
+            "gemini-3-flash-preview",      # Plan A: 표준 고속 엔진
+            "gemini-3.1-flash-lite-preview", # Plan A-2: 비상 고속 엔진
+            "gemini-3.1-pro-preview",      # Plan B: 고정밀 추론 엔진
+            "gemini-2.5-pro"               # Plan C: 최종 안정성 보루
         ]
 
     def _get_sector_keywords(self, sector):
