@@ -25,7 +25,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run Integrated Pipeline Test
+      - name: Run Integrated main_engine
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           KIS_API_KEY: ${{ secrets.KIS_API_KEY }}
@@ -33,4 +33,4 @@ jobs:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
-        run: python test_pipeline.py
+        run: python main_engine.py
