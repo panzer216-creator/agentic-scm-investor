@@ -11,9 +11,10 @@ class BaseAnalysisAgent:
         self.persona_name = persona_name
         # Parser와 동일한 3단계 모델 체인 상속
         self.model_tiers = [
-            "gemini-3.1-pro-preview", # 분석 단계는 정밀도를 위해 Pro를 우선순위로 설정 가능
-            "gemini-1.5-pro",
-            "gemini-3.1-flash"
+            "gemini-3-flash-preview",      # Plan A: 표준 고속 엔진
+            "gemini-3.1-flash-lite-preview", # Plan A-2: 비상 고속 엔진
+            "gemini-3.1-pro-preview",      # Plan B: 고정밀 추론 엔진
+            "gemini-2.5-pro"               # Plan C: 최종 안정성 보루
         ]
 
     def analyze(self, sdp, sector="반도체"):
