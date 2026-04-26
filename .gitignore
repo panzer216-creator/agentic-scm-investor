@@ -1,1 +1,19 @@
+# Python bytecode (컴파일 캐시)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables (보안 민감 파일 - 로직용)
 .env
+.venv
+env/
+venv/
+
+# Logs & Data (임시 생성 파일)
+*.log
+data/temp_*
+.pytest_cache/
+
+# OS specific files
+.DS_Store
+Thumbs.db
