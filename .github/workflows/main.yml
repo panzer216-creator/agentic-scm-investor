@@ -1,50 +1,37 @@
 name: Agentic SCM Investor Pipeline
 
 on:
-  # 1. 수동 실행: 테스트 및 긴급 분석 시 사용
   workflow_dispatch:
-  
-  # 2. 정기 실행: 매일 한국 시간 오전 7시 (UTC 22시)
   schedule:
     - cron: '0 22 * * *'
 
 jobs:
   analyze_market:
     runs-on: ubuntu-latest
-    # 분석 결과 파일(.json)을 저장소에 다시 쓰기 위한 권한
     permissions:
       contents: write
 
     steps:
-      # [공정 1] 소스 코드 체크아웃
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # [공정 2] 파이썬 환경 설정 (버전 3.10)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      # [공정 3] 의존성 라이브러리 설치
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # [공정 4] 스킬 모듈 수율 검증 (현재 타겟: DART API)
-      - name: Run Skill Module Test
+      # [최종 통합 공정] 데이터 수집부터 Parser 큐레이션까지 한 번에 검증
+      - name: Run Integrated Pipeline Test
         env:
-          # 인공지능 엔진
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # 데이터 공급망 (KIS, Naver, DART)
           KIS_API_KEY: ${{ secrets.KIS_API_KEY }}
           KIS_SECRET_KEY: ${{ secrets.KIS_SECRET_KEY }}
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
-          # 결과 보고 채널
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        # 💡 테스트하려는 파일 경로를 여기서 변경할 수 있습니다.
-        run: python skills/dart_api.py
+        run: python test_pipeline.py
