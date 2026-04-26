@@ -5,20 +5,26 @@ class OrchestratorAgent:
         self.reviewer = ReviewAgent()
 
     def decide(self, sdp, bull, red, stock_code, current_price):
-        """
-        [공정 수정 완료] Review Agent에 현재 주가 데이터 전달 인터페이스 개통
-        """
-        # 1. ReviewAgent용 현재가 데이터 규격 포장
+        # 1. ReviewAgent 동적 가중치 수급
         current_market_data = {stock_code: {"current_price": current_price}}
-        
-        # 2. 동적 가중치 수급
         weights = self.reviewer.get_dynamic_weights("data/analysis_history.json", current_market_data)
         w_bull = weights.get("bull", 50) / 100
         w_red = weights.get("red", 50) / 100
 
-        # 3. 하이브리드 판정 (수치적 결합)
-        g_bull = int(bull.get("conclusion", {}).get("Gauge_Bar", 50))
-        g_red = int(red.get("conclusion", {}).get("Gauge_Bar", 50))
+        # 2. [이중 절연] 불량 부품(문자열 등)을 빈 서랍장으로 강제 치환
+        def get_safe_gauge(agent_result):
+            conc = agent_result.get("conclusion", {})
+            if not isinstance(conc, dict): 
+                conc = {} # 문자열 환각 발생 시 빈 딕셔너리로 절연
+            try:
+                return int(conc.get("Gauge_Bar", 50))
+            except:
+                return 50 # 숫자가 아닐 경우 기본값 50 반환
+
+        g_bull = get_safe_gauge(bull)
+        g_red = get_safe_gauge(red)
+
+        # 3. 하이브리드 판정
         final_gauge = (g_bull * w_bull) + (g_red * w_red)
 
         # 4. 액션 규격화
@@ -29,8 +35,8 @@ class OrchestratorAgent:
 
         # 5. 논리 통합
         combined_why = [
-            f"[Bull] {bull.get('reasoning', [''])[0]}",
-            f"[Red] {red.get('reasoning', [''])[0]}"
+            f"[Bull] {bull.get('reasoning', ['정보 없음'])[0]}",
+            f"[Red] {red.get('reasoning', ['정보 없음'])[0]}"
         ]
 
         return {
