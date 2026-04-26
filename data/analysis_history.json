@@ -12,5 +12,30 @@
     },
     "timestamp": "2026-04-26 11:31:31",
     "stock_name": "삼성전자"
+  },
+  {
+    "conclusion": {
+      "Action": "전면 매도 또는 관망",
+      "Max_Weight": "5%",
+      "Gauge_Bar": 80
+    },
+    "reasoning": [
+      "Red Team 산출 리스크: 8.0/10",
+      "안전 재고 알고리즘에 따른 기계적 한도 통제 적용"
+    ],
+    "company_name": "삼성전자",
+    "strategy_tag": "Agentic 매트릭스 뷰",
+    "ui_metrics": {
+      "per_pbr": "35.0 / 3.0",
+      "rsi": 45,
+      "peg": 1.2,
+      "opm_yoy": "+5.2%p",
+      "order_backlog": 1.8,
+      "smart_money": "하이브리드 충족"
+    },
+    "plan_b_alerts": [
+      "🚨 [IQC Warning] 출처 식별 불가 데이터 감지. 안전을 위해 일부 데이터 Tier 2 일괄 강등."
+    ],
+    "timestamp": "2026-04-26T14:03:37.998944"
   }
 ]
