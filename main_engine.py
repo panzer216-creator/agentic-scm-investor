@@ -1,10 +1,9 @@
-
 import os
 import json
 import logging
 from datetime import datetime
 
-# 공정 부품 임포트
+# [공정 부품 임포트]
 from skills.kis_api import KISApi
 from skills.naver_api import NaverNewsApi
 from skills.dart_api import DartApi
@@ -13,45 +12,51 @@ from agents.parser_agent import ParserAgent
 from agents.analysis_agents import BullAgent, RedTeamAgent
 from agents.orchestrator_agent import OrchestratorAgent
 
-# 로깅 설정 (공정 로그 기록)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# [SCM 로깅 설정] 공정의 모든 발자국을 기록합니다.
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 class AgenticSCMEngine:
-    def __init__(self):
-        self.stock_code = "005930" # 삼성전자 (향후 리스트 관리 가능)
-        self.stock_name = "삼성전자"
-        self.sector = "반도체"
+    def __init__(self, stock_code="005930", stock_name="삼성전자", sector="반도체"):
+        self.stock_code = stock_code
+        self.stock_name = stock_name
+        self.sector = sector
+        self.history_path = "data/analysis_history.json"
 
     def run_production_line(self):
-        logging.info(f"🚀 {self.stock_name} 분석 공정 시작")
+        logging.info(f"🚀 {self.stock_name}({self.stock_code}) 분석 공정 가동 시작")
         
         try:
-            # [Step 1] 원재료 수급 (Data Sourcing)
-            raw_data = self._source_raw_data()
+            # 1. 원재료 수급 (Sourcing)
+            raw_data = self._source_data()
             
-            # [Step 2] 데이터 정제 (Parsing & Curation)
+            # 2. 데이터 정제 (Parsing)
             sdp = ParserAgent().parse(raw_data, self.sector)
-            if "error" in sdp: raise Exception(f"Parser 공정 결함: {sdp['error']}")
+            if "error" in sdp: raise Exception(f"Parser 결함 발생: {sdp['error']}")
 
-            # [Step 3] 다각도 분석 (Dialectical Analysis)
+            # 3. 관점 분석 (Dialectical Analysis)
             bull_result = BullAgent("Bull_Analyst").analyze(sdp, self.sector)
             red_result = RedTeamAgent("Red_Team").analyze(sdp, self.sector)
 
-            # [Step 4] 최종 의사결정 (Orchestration)
+            # 4. 최종 의사결정 (Orchestration)
             final_decision = OrchestratorAgent().decide(sdp, bull_result, red_result)
 
-            # [Step 5] 산출물 보관 및 배송 (Archiving & Delivery)
+            # 5. 데이터 아카이빙 및 배송 (Archiving & Delivery)
             self._archive_result(final_decision)
             TelegramApi().send_report(self.stock_name, final_decision)
             
-            logging.info("✅ 전체 분석 공정 완료 및 리포트 배송 성공")
+            logging.info("✅ 리포트 배송 완료. 전체 공정 정상 종료.")
 
         except Exception as e:
-            logging.error(f"❌ 공정 중단 발생: {str(e)}")
-            # 비상 알림 발송 로직 추가 가능
+            error_msg = f"❌ 공정 중단 발생: {str(e)}"
+            logging.error(error_msg)
+            # 비상시 텔레그램으로 장애 알림을 보낼 수 있는 확장성을 열어둡니다.
 
-    def _source_raw_data(self):
-        logging.info("📦 원재료 수급 중...")
+    def _source_data(self):
+        logging.info("📦 원재료(KIS/Naver/DART) 수집 중...")
         return {
             "price_info": KISApi().get_stock_data(self.stock_code),
             "news_list": NaverNewsApi().search_stock_news(self.stock_name),
@@ -59,18 +64,23 @@ class AgenticSCMEngine:
         }
 
     def _archive_result(self, result):
-        """분석 결과를 데이터베이스(JSON)에 기록하여 피드백 루프의 자산으로 활용"""
-        path = "data/analysis_history.json"
-        history = []
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                history = json.load(f)
+        """분석 이력을 저장하여 향후 '통계적 피드백 루프'의 기초 자산으로 활용"""
+        if not os.path.exists("data"): os.makedirs("data")
         
-        result["timestamp"] = datetime.now().isoformat()
+        history = []
+        if os.path.exists(self.history_path):
+            with open(self.history_path, "r", encoding="utf-8") as f:
+                try: history = json.load(f)
+                except: history = []
+        
+        # 메타 데이터 보강
+        result["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        result["stock_name"] = self.stock_name
         history.append(result)
         
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(history[-100:], f, indent=2, ensure_ascii=False) # 최근 100건 보존
+        # 최근 100건의 분석 결과만 보관 (저장 공간 최적화)
+        with open(self.history_path, "w", encoding="utf-8") as f:
+            json.dump(history[-100:], f, indent=2, ensure_ascii=False)
 
 if __name__ == "__main__":
     engine = AgenticSCMEngine()
