@@ -1,15 +1,18 @@
-name: Agentic SCM Investor Pipeline V2.1
+name: Agentic SCM Investor Pipeline V2.2
 
 on:
-  workflow_dispatch: # 수동 가동 버튼 활성화
+  workflow_dispatch: # 수동 가동 스위치
   schedule:
-    - cron: '0 22 * * *' # 매일 밤 10시 (KST 아침 7시) 자동 가동
+    # 평일(월~금) 한국 시간 오후 5시 (UTC 8시) 정기 가동 (필요시 수정)
+    - cron: '0 8 * * 1-5'
+
+# [핵심 1] 깃허브 창고에 데이터를 밀어넣기 위한 쓰기 권한
+permissions:
+  contents: write
 
 jobs:
   analyze_market:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # HTML 동적 연동을 위한 JSON 커밋 권한 필수 부여
 
     steps:
       - name: Checkout Repository
@@ -18,33 +21,37 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # 시스템 안정화 버전 고정
+          python-version: '3.10' # 안정성이 검증된 파이썬 버전
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          python -m pip install google-genai requests
 
-      - name: Run V2.1 Main Engine
+      - name: Run V2.2 Main Engine
         env:
-          # API Keys (원재료 수급용)
+          # [핵심 2] 외부 API 조달을 위한 환경 변수 연결 (저장소 Secrets에 등록된 값)
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          KIS_API_KEY: ${{ secrets.KIS_API_KEY }}
-          KIS_SECRET_KEY: ${{ secrets.KIS_SECRET_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          KIS_CANO: ${{ secrets.KIS_CANO }}
+          KIS_ACNT_PRDT_CD: ${{ secrets.KIS_ACNT_PRDT_CD }}
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
-          
-          # Telegram Andon & Delivery API (배송 및 비상벨용)
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python main_engine.py
-
-      - name: Archive JSON for UI Dashboard
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/analysis_history.json || true
-          git commit -m "📊 Auto-update V2.1 JSON for HTML Dashboard [skip ci]" || true
-          git push || true
+          python main_engine.py
+
+      - name: Commit and Push Data (물류 배송 공정)
+        run: |
+          # 봇 계정 초기화
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # 생산된 data 폴더 전체를 장바구니에 담기
+          git add data/
+          
+          # [핵심 3] 스마트 커밋: 변경 사항이 존재할 때만 커밋 및 푸시 실행
+          git diff --staged --quiet || (git commit -m "Auto-update V2.2 SCM analysis data" && git push)
