@@ -5,6 +5,7 @@ from skills.naver_api import NaverNewsApi
 from skills.dart_api import DartApi
 from agents.parser_agent import ParserAgent
 from agents.analysis_agents import BullAgent, RedTeamAgent
+from agents.orchestrator_agent import OrchestratorAgent
 
 def run_integrated_analysis():
     print("🚜 [Step 1] 데이터 공급망 가동 (Skills)...")
@@ -12,9 +13,11 @@ def run_integrated_analysis():
     naver = NaverNewsApi()
     dart = DartApi()
     
+    # 분석 대상 설정 (삼성전자)
     stock_code = "005930"
     stock_name = "삼성전자"
     
+    # 원재료 데이터 수집
     price_data = kis.get_stock_data(stock_code)
     news_data = naver.search_stock_news(stock_name)
     dart_data = dart.get_recent_reports(stock_code)
@@ -41,12 +44,16 @@ def run_integrated_analysis():
     red = RedTeamAgent(persona_name="Red_Team")
     red_result = red.analyze(sdp, sector="반도체")
     
+    print("⚖️ [Step 4] Orchestrator: 최종 의사결정 및 중재 중...")
+    orc = OrchestratorAgent()
+    final_decision = orc.decide(sdp, bull_result, red_result)
+    
+    # 최종 결과 출력 (사용자 리포트)
+    print("\n" + "🌟"*20)
+    print("🏆 [최종 투자 전략 보고서]")
+    print("🌟"*20)
+    print(json.dumps(final_decision, indent=2, ensure_ascii=False))
     print("\n" + "="*50)
-    print("📊 [종합 분석 결과 보고서]")
-    print("="*50)
-    print(f"\n[Bull의 관점]\n{json.dumps(bull_result, indent=2, ensure_ascii=False)}")
-    print(f"\n[Red Team의 관점]\n{json.dumps(red_result, indent=2, ensure_ascii=False)}")
-    print("="*50)
 
 if __name__ == "__main__":
     run_integrated_analysis()
