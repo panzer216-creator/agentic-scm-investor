@@ -1,15 +1,15 @@
 name: Agentic SCM Investor Pipeline
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # 수동 실행 허용
   schedule:
-    - cron: '0 22 * * *'
+    - cron: '0 22 * * *'  # 매일 밤 10시(KST 아침 7시) 자동 가동
 
 jobs:
   analyze_market:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # 분석 이력(JSON) 기록을 위한 권한
 
     steps:
       - name: Checkout Repository
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # 2026년 표준 버전
+          python-version: '3.11' # 2026년 표준 안정화 버전
 
       - name: Install dependencies
         run: |
@@ -27,10 +27,27 @@ jobs:
 
       - name: Run Integrated main_engine
         env:
+          # [API Keys]
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           KIS_API_KEY: ${{ secrets.KIS_API_KEY }}
           KIS_SECRET_KEY: ${{ secrets.KIS_SECRET_KEY }}
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          
+          # [News APIs]
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          
+          # [Notification APIs] ✅ 이 부분이 배송 성공의 핵심입니다.
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          
         run: python main_engine.py
+
+      # (선택 사항) 생성된 분석 이력(JSON)을 저장소에 다시 커밋하여 보관하고 싶다면 아래 단계를 추가하세요.
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/analysis_history.json || true
+          git commit -m "📊 Auto-update analysis history [skip ci]" || true
+          git push || true
