@@ -1,15 +1,15 @@
-name: Agentic SCM Investor Pipeline
+name: Agentic SCM Investor Pipeline V2.1
 
 on:
-  workflow_dispatch:  # 수동 실행 허용
+  workflow_dispatch: # 수동 가동 버튼 활성화
   schedule:
-    - cron: '0 22 * * *'  # 매일 밤 10시(KST 아침 7시) 자동 가동
+    - cron: '0 22 * * *' # 매일 밤 10시 (KST 아침 7시) 자동 가동
 
 jobs:
   analyze_market:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 분석 이력(JSON) 기록을 위한 권한
+      contents: write # HTML 동적 연동을 위한 JSON 커밋 권한 필수 부여
 
     steps:
       - name: Checkout Repository
@@ -18,36 +18,33 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # 2026년 표준 안정화 버전
+          python-version: '3.11' # 시스템 안정화 버전 고정
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -m pip install google-genai requests
 
-      - name: Run Integrated main_engine
+      - name: Run V2.1 Main Engine
         env:
-          # [API Keys]
+          # API Keys (원재료 수급용)
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           KIS_API_KEY: ${{ secrets.KIS_API_KEY }}
           KIS_SECRET_KEY: ${{ secrets.KIS_SECRET_KEY }}
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
-          
-          # [News APIs]
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           
-          # [Notification APIs] ✅ 이 부분이 배송 성공의 핵심입니다.
+          # Telegram Andon & Delivery API (배송 및 비상벨용)
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          
         run: python main_engine.py
 
-      # (선택 사항) 생성된 분석 이력(JSON)을 저장소에 다시 커밋하여 보관하고 싶다면 아래 단계를 추가하세요.
-      - name: Commit and push changes
+      - name: Archive JSON for UI Dashboard
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add data/analysis_history.json || true
-          git commit -m "📊 Auto-update analysis history [skip ci]" || true
+          git commit -m "📊 Auto-update V2.1 JSON for HTML Dashboard [skip ci]" || true
           git push || true
