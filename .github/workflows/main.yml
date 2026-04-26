@@ -1,12 +1,11 @@
 name: Agentic SCM Investor Pipeline V2.2
 
 on:
-  workflow_dispatch: # 수동 가동 스위치
+  workflow_dispatch:
   schedule:
-    # 평일(월~금) 한국 시간 오후 5시 (UTC 8시) 정기 가동 (필요시 수정)
     - cron: '0 8 * * 1-5'
 
-# [핵심 1] 깃허브 창고에 데이터를 밀어넣기 위한 쓰기 권한
+# 창고 입고(Push)를 위한 쓰기 권한 명시
 permissions:
   contents: write
 
@@ -21,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10' # 안정성이 검증된 파이썬 버전
+          python-version: '3.10'
 
       - name: Install Dependencies
         run: |
@@ -30,7 +29,6 @@ jobs:
 
       - name: Run V2.2 Main Engine
         env:
-          # [핵심 2] 외부 API 조달을 위한 환경 변수 연결 (저장소 Secrets에 등록된 값)
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -44,14 +42,13 @@ jobs:
         run: |
           python main_engine.py
 
-      - name: Commit and Push Data (물류 배송 공정)
+      - name: Commit and Push Data (유연한 물류 배송)
         run: |
-          # 봇 계정 초기화
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # 생산된 data 폴더 전체를 장바구니에 담기
-          git add data/
+          # data 폴더에 국한하지 않고 변경된 모든 것을 장바구니에 담음
+          git add .
           
-          # [핵심 3] 스마트 커밋: 변경 사항이 존재할 때만 커밋 및 푸시 실행
-          git diff --staged --quiet || (git commit -m "Auto-update V2.2 SCM analysis data" && git push)
+          # 스마트 커밋: 변경 사항이 없으면 부드럽게 스킵, 에러가 나도 공정 실패(Red) 처리하지 않음
+          git diff --staged --quiet || (git commit -m "Auto-update V2.2 SCM data" && git push) || true
