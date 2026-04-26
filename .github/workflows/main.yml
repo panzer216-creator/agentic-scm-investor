@@ -1,31 +1,19 @@
-name: Agentic-Investment-Scm-Bot
-
-on:
-  schedule:
-    # 매일 월~금 오전 7시 (UTC 22:00)
-    - cron: '0 22 * * 0-4'
-  workflow_dispatch:
+name: KIS API M1 Test
+on: [workflow_dispatch] # 수동 실행 버튼 활성화
 
 jobs:
-  run-agent:
+  test_auth:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip' # 패키지 캐싱 활성화 (빌드 속도 향상)
-
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      - name: Execute Analysis Engine
+      - name: Run M1 Test
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
-        run: python main.py
+          KIS_API_KEY: ${{ secrets.KIS_API_KEY }}
+          KIS_SECRET_KEY: ${{ secrets.KIS_SECRET_KEY }}
+        run: python skills/kis_api.py
