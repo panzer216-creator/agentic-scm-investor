@@ -4,33 +4,57 @@ import logging
 
 class ReviewAgent:
     def __init__(self):
-        # 공장 초기화 기본 가중치
+        # 최소/최대 가중치 제약 (절연 파괴 방지)
+        self.min_weight = 30
+        self.max_weight = 70
         self.default_weights = {"bull": 50, "red": 50}
 
-    def get_current_weights(self, history_path):
-        """과거 JSON 이력을 읽어 예측 적중률 기반의 동적 가중치 산출"""
-        
-        # 1. 파일 자체가 없으면 기본값 반환
+    def get_dynamic_weights(self, history_path, current_market_data):
+        """
+        [SCM 사후 검증] 과거 예측치와 실제 수익률을 대조하여 가중치 산출
+        """
         if not os.path.exists(history_path):
-            logging.info("과거 분석 이력 없음. Factory Default(50:50) 가중치 적용.")
             return self.default_weights
             
         try:
             with open(history_path, "r", encoding="utf-8") as f:
                 history = json.load(f)
-                
-            # 2. 비교할 만큼 충분한 데이터가 쌓이지 않았다면 기본값 반환
-            if len(history) < 2:
+            
+            if len(history) < 3: # 최소 표본 확보 전까지는 기본값
                 return self.default_weights
 
-            # 3. 사후 검증 (Post-Mortem) 로직 전개
-            # (향후 과제: 이 위치에 KIS API를 통해 일주일 전 주가와 현재 주가를 조회하고,
-            # 과거의 action/target_weight와 대조하여 오차를 수리적으로 계산하는 코드가 탑재됩니다.)
+            bull_score = 0
+            red_score = 0
             
-            logging.info("사후 검증(Post-Mortem) 프로세스 통과. 현재는 안정성을 위해 50:50 보정.")
-            return {"bull": 50, "red": 50} 
+            # 최근 5개 공정 결과물 전수 조사
+            for record in history[-5:]:
+                # 1. 분석 당시 대비 현재 수익률 계산
+                last_price = record.get("ui_metrics", {}).get("last_analyzed_price", 0)
+                # current_market_data는 Main Engine에서 주입받음
+                current_price = current_market_data.get(record['stock_code'], {}).get('price', last_price)
+                
+                if last_price == 0: continue
+                return_rate = (current_price - last_price) / last_price * 100
+                
+                # 2. Bull/Red 기여도 산출 로직
+                # 수익률이 플러스면 Bull 가점, 마이너스면 Red(리스크 감지) 가점
+                if return_rate > 2.0: bull_score += 1
+                elif return_rate < -2.0: red_score += 1
+
+            # 3. 가중치 정규화 (Softmax 또는 단순 비중)
+            total = bull_score + red_score
+            if total == 0: return self.default_weights
             
+            new_bull = int((bull_score / total) * 100)
+            new_red = 100 - new_bull
+            
+            # 4. 하네스 제약 적용 (30% ~ 70% 사이로 보정)
+            new_bull = max(self.min_weight, min(self.max_weight, new_bull))
+            new_red = 100 - new_bull
+            
+            logging.info(f"⚖️ 가중치 조정 완료 -> Bull: {new_bull}, Red: {new_red}")
+            return {"bull": new_bull, "red": new_red}
+
         except Exception as e:
-            # 4. JSON 파싱 에러나 데이터 오염 시 Plan B 가동
-            logging.error(f"Review Agent 오류 발생: {e}. 시스템 보호를 위해 가중치 롤백(50:50) 가동.")
+            logging.error(f"Review Agent 가동 붕괴: {e}")
             return self.default_weights
