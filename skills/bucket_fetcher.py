@@ -4,54 +4,59 @@ import logging
 
 class BucketFetcher:
     def __init__(self):
-        # 종목 리스트를 코드가 아닌 외부 설정 파일로 분리 (동적 조달)
         self.universe_path = "data/universe.json"
         self._ensure_universe_exists()
 
     def _ensure_universe_exists(self):
-        """유니버스 파일이 없으면 SCM 병목 중심의 기본 템플릿을 자동 생성합니다."""
+        """병목 핵심 대장주 중심의 6~8개 확장 유니버스 템플릿"""
         if not os.path.exists("data"):
             os.makedirs("data")
         
         if not os.path.exists(self.universe_path):
             default_universe = {
                 "Group-A (Semicon Bottleneck)": [
-                    {"code": "000660", "name": "SK하이닉스", "sector": "HBM/반도체"},
-                    {"code": "042700", "name": "한미반도체", "sector": "TC본더/반도체"},
-                    {"code": "089290", "name": "인텍플러스", "sector": "외관검사/반도체"},
-                    {"code": "232290", "name": "와이씨", "sector": "검사장비/반도체"},
-                    {"code": "164060", "name": "필옵틱스", "sector": "유리기판/반도체"}
+                    {"code": "000660", "name": "SK하이닉스", "sector": "HBM/메모리"},
+                    {"code": "042700", "name": "한미반도체", "sector": "TC본더/독점"},
+                    {"code": "089290", "name": "인텍플러스", "sector": "외관검사"},
+                    {"code": "232290", "name": "와이씨", "sector": "검사장비"},
+                    {"code": "164060", "name": "필옵틱스", "sector": "유리기판"},
+                    {"code": "131290", "name": "TSE", "sector": "테스트소켓"},
+                    {"code": "039030", "name": "이오테크닉스", "sector": "레이저커팅"},
+                    {"code": "003160", "name": "디아이", "sector": "HBM테스트"}
                 ],
                 "Group-B (Infrastructure/Ship)": [
-                    {"code": "010620", "name": "HD현대중공업", "sector": "조선/물류병목"},
-                    {"code": "267260", "name": "HD현대일렉트릭", "sector": "변압기/전력병목"},
-                    {"code": "010120", "name": "LS", "sector": "전력인프라"}
+                    {"code": "329180", "name": "HD현대중공업", "sector": "조선/도크병목"},
+                    {"code": "010140", "name": "삼성중공업", "sector": "LNG선/해양"},
+                    {"code": "014620", "name": "성광벤드", "sector": "피팅/조선기자재"},
+                    {"code": "023160", "name": "태광", "sector": "피팅/조선기자재"},
+                    {"code": "033500", "name": "동성화인텍", "sector": "보냉재"},
+                    {"code": "306200", "name": "세아제강", "sector": "강관/인프라"}
                 ],
-                "Group-C (Value-Up & Energy)": [
-                    {"code": "000270", "name": "기아", "sector": "밸류업/자동차"},
-                    {"code": "000880", "name": "한화", "sector": "방산/에너지"}
+                "Group-C (Power/Grid)": [
+                    {"code": "267260", "name": "HD현대일렉트릭", "sector": "초고압변압기"},
+                    {"code": "010120", "name": "LS일렉트릭", "sector": "전력기기"},
+                    {"code": "033100", "name": "제룡전기", "sector": "중소형변압기"},
+                    {"code": "298040", "name": "효성중공업", "sector": "변압기/ESS"},
+                    {"code": "103590", "name": "일진전기", "sector": "초고압전선"},
+                    {"code": "001440", "name": "대한전선", "sector": "해저케이블"}
                 ],
                 "Group-D (Strategic Reserve)": [
-                    {"code": "005930", "name": "삼성전자", "sector": "벤치마크/반도체"},
-                    {"code": "035420", "name": "NAVER", "sector": "AI인프라"}
+                    {"code": "005930", "name": "삼성전자", "sector": "벤치마크"},
+                    {"code": "000270", "name": "기아", "sector": "밸류업/환율"},
+                    {"code": "005380", "name": "현대차", "sector": "밸류업"},
+                    {"code": "035420", "name": "NAVER", "sector": "플랫폼"},
+                    {"code": "138040", "name": "메리츠금융지주", "sector": "주주환원"},
+                    {"code": "105560", "name": "KB금융", "sector": "주주환원/금리"}
                 ]
             }
             with open(self.universe_path, "w", encoding="utf-8") as f:
                 json.dump(default_universe, f, indent=4, ensure_ascii=False)
-            logging.info("🌱 신규 투자 유니버스(universe.json) 템플릿이 생성되었습니다.")
+            logging.info("🌱 신규 확장 투자 유니버스(universe.json) 생성 완료.")
 
     def get_dynamic_production_plan(self):
-        """외부 파일에서 동적으로 타겟 리스트를 조달합니다."""
         try:
             with open(self.universe_path, "r", encoding="utf-8") as f:
-                production_plan = json.load(f)
-            
-            total_stocks = sum(len(stocks) for stocks in production_plan.values())
-            logging.info(f"📋 외부 유니버스에서 총 {total_stocks}개 종목 조달 완료")
-            return production_plan
-            
+                return json.load(f)
         except Exception as e:
             logging.error(f"❌ 유니버스 조달 실패: {e}")
             return {}
-
-
