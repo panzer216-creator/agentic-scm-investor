@@ -5,121 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>산업 병목 추적 & 투자 매트릭스 v2.2</title>
     <style>
-        :root {
-            --bg-color: #f8f9fa;
-            --text-color: #212529;
-            --card-bg: #ffffff;
-            --accent-orange: #d35400;
-            --border-color: #dee2e6;
-            --buy-red: #e74c3c;
-            --wait-gray: #7f8c8d;
-        }
-        /* 다크모드 대응 (사용자 기기 설정에 따름) */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #1a1a1a;
-                --text-color: #e0e0e0;
-                --card-bg: #262626;
-                --border-color: #333;
-            }
-        }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; line-height: 1.6; }
-        .container { max-width: 900px; margin: 0 auto; }
-        header { border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-        
-        .group-section { margin-bottom: 25px; }
-        .group-title { font-size: 1.5em; font-weight: bold; color: var(--accent-orange); margin-bottom: 15px; padding-left: 10px; border-left: 5px solid var(--accent-orange); }
-        
-        details { background: var(--card-bg); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-color); overflow: hidden; }
+        :root { --bg: #f8f9fa; --text: #212529; --card: #fff; --accent: #d35400; --red: #e74c3c; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #1a1a1a; --text: #e0e0e0; --card: #262626; } }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .group-title { font-size: 1.4em; font-weight: bold; color: var(--accent); margin: 30px 0 15px 0; border-left: 5px solid var(--accent); padding-left: 10px; }
+        details { background: var(--card); border-radius: 12px; margin-bottom: 10px; border: 1px solid #333; overflow: hidden; }
         summary { padding: 20px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; list-style: none; }
-        summary::-webkit-details-marker { display: none; }
-        
-        .action-tag { padding: 5px 15px; border-radius: 20px; font-size: 0.9em; color: white; }
-        .buy { background-color: var(--buy-red); }
-        .wait { background-color: var(--wait-gray); }
-
-        .content { padding: 0 20px 20px 20px; border-top: 1px solid var(--border-color); }
-        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .metric-box { background: rgba(128,128,128,0.1); padding: 15px; border-radius: 8px; text-align: center; }
-        .m-label { font-size: 0.75em; color: #888; margin-bottom: 5px; }
-        .m-value { font-size: 1.1em; font-weight: bold; }
-
-        .entry-point-box { background: rgba(231, 76, 60, 0.05); border: 1px dashed var(--buy-red); border-radius: 8px; padding: 15px; margin-top: 20px; }
-        .entry-title { color: var(--buy-red); font-weight: bold; margin-bottom: 5px; }
-        
-        .reasoning-box { margin-top: 20px; font-size: 0.95em; color: var(--text-color); opacity: 0.9; }
-        .reason-item { margin-bottom: 10px; padding-left: 10px; border-left: 3px solid #ccc; }
+        .action-tag { padding: 4px 12px; border-radius: 20px; font-size: 0.85em; background: #444; color: #fff; }
+        .buy { background: var(--red); }
+        .content { padding: 0 20px 20px; border-top: 1px solid #333; }
+        .hexagon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .m-box { background: rgba(128,128,128,0.1); padding: 12px; border-radius: 8px; text-align: center; }
+        .m-label { font-size: 0.7em; color: #888; margin-bottom: 4px; }
+        .m-value { font-size: 1em; font-weight: bold; }
+        .timing-box { background: rgba(231, 76, 60, 0.08); border: 1px dashed var(--red); border-radius: 8px; padding: 15px; margin-top: 20px; font-size: 0.9em; }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🏗️ 산업 병목 추적 & 투자 매트릭스 v2.2</h1>
-            <p id="update-time">데이터 분석 중...</p>
-        </header>
-        <div id="dashboard">
-            </div>
+        <h1 style="text-align:center;">🏗️ 산업 병목 & 투자 매트릭스</h1>
+        <div id="dashboard"></div>
     </div>
-
     <script>
-        async function loadDashboard() {
-            const res = await fetch('data/analysis_history.json?t=' + Date.now());
-            const data = await res.json();
+        async function render() {
+            const data = await (await fetch('data/analysis_history.json?t=' + Date.now())).json();
             const container = document.getElementById('dashboard');
-            container.innerHTML = '';
-
-            // Group_ID별로 종목 그룹화
             const groups = {};
-            data.forEach(item => {
-                if (!groups[item.group_id]) groups[item.group_id] = [];
-                groups[item.group_id].push(item);
-            });
-
-            // 그룹별 렌더링 (A, B, C, D 순서)
-            Object.keys(groups).sort().forEach(groupId => {
-                const section = document.createElement('div');
-                section.className = 'group-section';
-                section.innerHTML = `<div class="group-title">${groupId}</div>`;
-                
-                groups[groupId].forEach(item => {
-                    const metrics = item.ui_metrics || {};
-                    const conc = item.conclusion || {};
-                    const actionClass = conc.Action.includes('매수') ? 'buy' : 'wait';
-                    
-                    const itemHtml = `
+            data.forEach(item => { if(!groups[item.group_id]) groups[item.group_id] = []; groups[item.group_id].push(item); });
+            Object.keys(groups).sort().forEach(gId => {
+                let html = `<div class="group-title">${gId}</div>`;
+                groups[gId].forEach(item => {
+                    const m = item.ui_metrics;
+                    html += `
                         <details>
-                            <summary>
-                                <span>${item.company_name} <small style="color:#888;">[${item.stock_code}]</small></span>
-                                <span class="action-tag ${actionClass}">${conc.Action}</span>
-                            </summary>
+                            <summary><span>${item.company_name} <small>[${item.stock_code}]</small></span>
+                            <span class="action-tag ${item.conclusion.Action.includes('매수')?'buy':''}">${item.conclusion.Action}</span></summary>
                             <div class="content">
-                                <div class="metrics-grid">
-                                    <div class="metric-box"><div class="m-label">PER / PBR</div><div class="m-value">${metrics.per_pbr}</div></div>
-                                    <div class="metric-box"><div class="m-label">RSI(14)</div><div class="m-value">${metrics.rsi}</div></div>
-                                    <div class="metric-box"><div class="m-label">RS SCORE</div><div class="m-value">${metrics.rs_score}</div></div>
-                                    <div class="metric-box"><div class="m-label">재고회전율</div><div class="m-value">${metrics.inv_turnover}</div></div>
-                                    <div class="metric-box"><div class="m-label">SMART MONEY</div><div class="m-value">${metrics.smart_money}</div></div>
+                                <div class="hexagon-grid">
+                                    <div class="m-box"><div class="m-label">PBR / OPM YoY</div><div class="m-value">${m.pbr_opm}</div></div>
+                                    <div class="m-box"><div class="m-label">수주잔고비율</div><div class="m-value">${m.backlog}</div></div>
+                                    <div class="m-box"><div class="m-label">재고회전율</div><div class="m-value">${m.turnover}</div></div>
+                                    <div class="m-box"><div class="m-label">RSI(14)</div><div class="m-value">${m.rsi}</div></div>
+                                    <div class="m-box"><div class="m-label">RS SCORE</div><div class="m-value">${m.rs_score}</div></div>
+                                    <div class="m-box"><div class="m-label">SMART MONEY</div><div class="m-value">${m.smart_money}</div></div>
                                 </div>
-                                
-                                <div class="entry-point-box">
-                                    <div class="entry-title">🎯 실전 진입 타점</div>
-                                    <div style="font-size:0.9em;">${item.entry_point_guide || '지표 산출 중...'}</div>
-                                </div>
-
-                                <div class="reasoning-box">
-                                    <strong>📝 SCM & 퀀트 분석 논리:</strong>
-                                    <div class="reason-item">${item.reasoning.join('<br>')}</div>
-                                </div>
+                                <div class="timing-box"><strong>🎯 실전 타점:</strong> ${item.entry_point_guide}</div>
                             </div>
-                        </details>
-                    `;
-                    section.innerHTML += itemHtml;
+                        </details>`;
                 });
-                container.appendChild(section);
+                container.innerHTML += html;
             });
-            document.getElementById('update-time').innerText = `최종 데이터 연동 완료: ${new Date().toLocaleString()}`;
         }
-        window.onload = loadDashboard;
+        window.onload = render;
     </script>
 </body>
 </html>
