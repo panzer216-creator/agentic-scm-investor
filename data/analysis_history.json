@@ -118,5 +118,257 @@
     },
     "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
     "timestamp": "2026-04-26T22:45:59.153091"
+  },
+  {
+    "stock_code": "042700",
+    "company_name": "한미반도체",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 10,
+      "Max_Weight": "10%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(10) & Red(10) 통합 리스크: 10.0",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '분할 매수' 결정 (Max 10%)",
+      "[Bull Point] 메릴린치 등 외국계 증권사의 목표가 대폭 상향과 한국의 신규 메가 팹이라는 평가는 동사의 TC본더 기술력이 AI 반도체 공급망(SCM) 내에서 대체 불가능한 핵심 요소로 자리 잡았음을 증명하며, 향후 OSAT 및 삼성전자로의 공급망 확대 가능성은 압도적인 시장 지배력 강화로 이어질 것입니다.",
+      "[Red Point] 한미반도체의 삼성전자 공급 가능성은 외국계 증권사의 단순 기대감에 불과하며, 최악의 경우 삼성전자가 ASMPT 등 해외 경쟁사 장비를 채택하거나 자체 벤더망을 구축할 시 심각한 밸류에이션 붕괴가 불가피함."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:10:45.500137"
+  },
+  {
+    "stock_code": "089290",
+    "company_name": "인텍플러스",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 15,
+      "Max_Weight": "10%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(15) & Red(15) 통합 리스크: 15.0",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '분할 매수' 결정 (Max 10%)",
+      "[Bull Point] 글로벌 1위 파운드리 업체와의 FC-BGA 기판 검사장비 공급 계약 및 인텔과의 차세대 유리기판 공동 R&D 진행은 동사가 글로벌 톱티어 반도체 SCM 내에서 핵심 장비 공급사로서의 강력한 입지와 기술적 우위를 확보하고 있음을 입증합니다.",
+      "[Red Point] 기관 투자자의 지속적인 순매도세는 표면적인 호재 이면에 실적 가시성에 대한 심각한 의구심이나 고평가 리스크가 존재함을 강력히 시사함."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:11:20.903740"
+  },
+  {
+    "stock_code": "232290",
+    "company_name": "와이씨",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(20) & Red(15) 통합 리스크: 17.5",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '분할 매수' 결정 (Max 10%)",
+      "[Bull Point] 와이씨(YC)는 최대 DRAM 및 NAND 생산능력을 보유한 핵심 고객사(삼성전자)의 설비투자 확대 사이클에 직접적인 수혜를 입으며, 웨이퍼 테스트 장비 공급망 내에서 확고한 SCM적 강점을 지니고 있습니다.",
+      "[Red Point] 삼성전자의 설비투자(Capex) 사이클에 전적으로 의존하는 수익 구조는 치명적인 리스크임. 글로벌 거시경제 악화나 메모리 반도체 수요 둔화로 삼성전자가 투자를 축소하거나 지연할 경우, 와이씨의 실적은 즉각적으로 붕괴될 수 있는 '단일 고객사 종속 리스크'에 무방비로 노출되어 있음."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:11:56.149789"
+  },
+  {
+    "stock_code": "164060",
+    "company_name": "필옵틱스",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "비중 축소/관망",
+      "Gauge_Bar": 50,
+      "Max_Weight": "0%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(15) & Red(85) 통합 리스크: 50.0",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '비중 축소/관망' 결정 (Max 0%)",
+      "[Bull Point] 필옵틱스는 차세대 반도체 기판인 유리기판 제조의 핵심인 유리관통전극(TGV) 장비를 최초로 상용화하며 SCM 내 핵심 장비 공급자로서의 선점 효과를 확보했습니다. 이는 삼성전자의 유리기판 상용화 가속화 기조와 맞물려 강력한 시장 지배력 확대로 이어질 가능성이 높습니다.",
+      "[Red Point] 삼성전자의 유리기판 상용화 일정 지연 시 테마성 주가 프리미엄이 즉각 소멸하며 급격한 주가 폭락이 발생할 수 있는 심각한 밸류에이션 리스크가 존재합니다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:12:31.923380"
+  },
+  {
+    "stock_code": "267260",
+    "company_name": "HD현대일렉트릭",
+    "group_id": "Group-B (Infrastructure/Ship)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 12,
+      "Max_Weight": "10%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(15) & Red(10) 통합 리스크: 12.5",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '분할 매수' 결정 (Max 10%)",
+      "[Bull Point] 북미 전력 인프라 투자 확대와 AI 데이터센터 시장 진출 예고로 인한 강력한 수주 모멘텀 확보 및 HD현대중공업과의 협업을 통한 SCM(공급망 관리) 시너지 창출 기대",
+      "[Red Point] 중동 지정학적 리스크 과소평가: 언론은 중동 프로젝트의 '소폭 조정'으로 낙관하나, 전쟁 장기화 및 확전 시 프로젝트 전면 취소, 공기 지연, 대금 미회수 등 심각한 펀더멘털 훼손으로 이어질 수 있는 뇌관임."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:13:18.226651"
+  },
+  {
+    "stock_code": "010120",
+    "company_name": "LS",
+    "group_id": "Group-B (Infrastructure/Ship)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(15) & Red(20) 통합 리스크: 17.5",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '분할 매수' 결정 (Max 10%)",
+      "[Bull Point] LS일렉트릭은 1분기 매출 1조 3,766억원(전년비 +33.4%), 영업이익 1,266억원(전년비 +45.0%)의 역대급 실적을 달성하며, 글로벌 전력기기 수요 급증에 대응하는 압도적인 SCM 역량과 생산 유연성을 입증했습니다.",
+      "[Red Point] 주가 과열 및 밸류에이션 붕괴 위험: LS일렉트릭의 주가가 단기 101% 급등하며 시장 기대치가 최고조에 달해 있습니다. 최악의 시나리오에서는 북미 및 유럽의 전력망 투자 지연이나 수주 둔화가 발생할 경우, 미세한 실적 미달에도 밸류에이션이 붕괴되며 대규모 매도세가 촉발될 수 있습니다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:13:59.663592"
+  },
+  {
+    "stock_code": "000270",
+    "company_name": "기아",
+    "group_id": "Group-C (Value-Up & Energy)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(20) & Red(15) 통합 리스크: 17.5",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '분할 매수' 결정 (Max 10%)",
+      "[Bull Point] 기아는 1분기 관세 부담과 인센티브 증가 등 불리한 환경 속에서도 고수익 차종 중심의 판매 믹스 개선과 평균판매가격(ASP) 상승을 이끌어내며 29.5조원의 역대 최대 매출을 기록, 확고한 시장 지배력을 증명했습니다.",
+      "[Red Point] 기아의 1분기 역대 최대 매출 이면에는 관세 부담과 인센티브 증가로 인한 수익성 둔화라는 치명적 리스크가 존재함. 고금리 장기화와 소비 침체 속에서 판매량 유지를 위한 인센티브 출혈 경쟁이 심화될 경우 영업이익률이 걷잡을 수 없이 추락할 최악의 시나리오가 예상됨."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:14:36.511626"
+  },
+  {
+    "stock_code": "000880",
+    "company_name": "한화",
+    "group_id": "Group-C (Value-Up & Energy)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(20) & Red(15) 통합 리스크: 17.5",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '분할 매수' 결정 (Max 10%)",
+      "[Bull Point] 한화오션의 3년 치 이상의 풍부한 수주 잔고 확보와 한화엔진의 생산 프로세스 효율화에 따른 원가 절감은 그룹의 강력한 SCM 통제력과 안정적인 공급망 관리 능력을 입증합니다.",
+      "[Red Point] 지배구조 개편 및 오너 일가 3남의 퇴사와 신설 법인 이동은 경영권 승계 과정의 불확실성과 내부 파벌 갈등을 암시하며, 최악의 경우 핵심 사업인 방산 및 에너지 부문의 전략적 의사결정 지연과 리더십 공백으로 이어질 수 있습니다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:15:21.801311"
+  },
+  {
+    "stock_code": "035420",
+    "company_name": "NAVER",
+    "group_id": "Group-D (Strategic Reserve)",
+    "data_fingerprint": "INITIAL",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 20,
+      "Max_Weight": "10%"
+    },
+    "reasoning": [
+      "📊 [정성/SCM] Bull(30) & Red(10) 통합 리스크: 20.0",
+      "📈 [정량/모멘텀] RSI(14): 57.1, 시장 대비 상대강도(RS): 1.05",
+      "💡 [최종 판정] 직렬 매트릭스 필터링 결과 '분할 매수' 결정 (Max 10%)",
+      "[Bull Point] 타 상장사들의 높은 지분 보유율(삼성전자, SK하이닉스에 이어 최상위권)은 동사의 AI 인프라 및 플랫폼 사업에 대한 시장의 높은 신뢰도와 견고한 기업 간 네트워크를 통한 SCM 파트너십 강점을 방증함.",
+      "[Red Point] [핵심 사업 경쟁력 상실 및 무리한 다각화 리스크] NAVER의 두나무 주식 교환 및 온코마스터 흡수합병은 본업인 AI 인프라 고도화와 무관한 가상자산 및 바이오 산업으로의 무리한 외형 확장이다. 이는 막대한 자본 소모와 핵심 역량 분산을 초래하며, 글로벌 빅테크와의 AI 인프라 경쟁에서 도태되는 최악의 시그널로 작용할 것이다."
+    ],
+    "ui_metrics": {
+      "per_pbr": "12.5 / 1.1",
+      "rsi": 57.1,
+      "rs_score": 1.05,
+      "inv_turnover": "N/A",
+      "smart_money": "개인 주도",
+      "last_analyzed_price": 10000
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T00:16:05.051748"
   }
 ]

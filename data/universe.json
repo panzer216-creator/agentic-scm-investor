@@ -1,0 +1,70 @@
+{
+    "Group-A (Semicon Bottleneck)": [
+        {
+            "code": "000660",
+            "name": "SK하이닉스",
+            "sector": "HBM/반도체"
+        },
+        {
+            "code": "042700",
+            "name": "한미반도체",
+            "sector": "TC본더/반도체"
+        },
+        {
+            "code": "089290",
+            "name": "인텍플러스",
+            "sector": "외관검사/반도체"
+        },
+        {
+            "code": "232290",
+            "name": "와이씨",
+            "sector": "검사장비/반도체"
+        },
+        {
+            "code": "164060",
+            "name": "필옵틱스",
+            "sector": "유리기판/반도체"
+        }
+    ],
+    "Group-B (Infrastructure/Ship)": [
+        {
+            "code": "010620",
+            "name": "HD현대중공업",
+            "sector": "조선/물류병목"
+        },
+        {
+            "code": "267260",
+            "name": "HD현대일렉트릭",
+            "sector": "변압기/전력병목"
+        },
+        {
+            "code": "010120",
+            "name": "LS",
+            "sector": "전력인프라"
+        }
+    ],
+    "Group-C (Value-Up & Energy)": [
+        {
+            "code": "000270",
+            "name": "기아",
+            "sector": "밸류업/자동차"
+        },
+        {
+            "code": "000880",
+            "name": "한화",
+            "sector": "방산/에너지"
+        }
+    ],
+    "Group-D (Strategic Reserve)": [
+        {
+            "code": "005930",
+            "name": "삼성전자",
+            "sector": "벤치마크/반도체"
+        },
+        {
+            "code": "035420",
+            "name": "NAVER",
+            "sector": "AI인프라"
+        }
+    ]
+}
