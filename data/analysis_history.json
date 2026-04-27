@@ -1,0 +1,678 @@
+[
+  {
+    "stock_code": "000660",
+    "company_name": "SK하이닉스",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 20,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 20.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "1.25 / +12.4%",
+      "backlog": "185%",
+      "turnover": "6.2회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T02:59:05.701307"
+  },
+  {
+    "stock_code": "042700",
+    "company_name": "한미반도체",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 15,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 15.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "1.25 / +12.4%",
+      "backlog": "185%",
+      "turnover": "6.2회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T02:59:45.239907"
+  },
+  {
+    "stock_code": "089290",
+    "company_name": "인텍플러스",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "비중 축소",
+      "Gauge_Bar": 55,
+      "Max_Weight": "0%"
+    },
+    "entry_point_guide": "⚠️ 리스크 과열. 신규 진입 금지 및 차익 실현 권장.",
+    "reasoning": [
+      "통합 리스크 55.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "1.25 / +12.4%",
+      "backlog": "185%",
+      "turnover": "6.2회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:00:24.509361"
+  },
+  {
+    "stock_code": "232290",
+    "company_name": "와이씨",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 17.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:00:58.460421"
+  },
+  {
+    "stock_code": "164060",
+    "company_name": "필옵틱스",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 17.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:01:38.266986"
+  },
+  {
+    "stock_code": "131290",
+    "company_name": "TSE",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 27,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 27.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:02:20.432842"
+  },
+  {
+    "stock_code": "039030",
+    "company_name": "이오테크닉스",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 15,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 15.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:02:57.560830"
+  },
+  {
+    "stock_code": "003160",
+    "company_name": "디아이",
+    "group_id": "Group-A (Semicon Bottleneck)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 12,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 12.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:03:36.387890"
+  },
+  {
+    "stock_code": "329180",
+    "company_name": "HD현대중공업",
+    "group_id": "Group-B (Infrastructure/Ship)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 15,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 15.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:04:17.611826"
+  },
+  {
+    "stock_code": "010140",
+    "company_name": "삼성중공업",
+    "group_id": "Group-B (Infrastructure/Ship)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 20,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 20.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:04:57.710627"
+  },
+  {
+    "stock_code": "014620",
+    "company_name": "성광벤드",
+    "group_id": "Group-B (Infrastructure/Ship)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 17.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:05:57.655140"
+  },
+  {
+    "stock_code": "023160",
+    "company_name": "태광",
+    "group_id": "Group-B (Infrastructure/Ship)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 35,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 35.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:06:43.691992"
+  },
+  {
+    "stock_code": "033500",
+    "company_name": "동성화인텍",
+    "group_id": "Group-B (Infrastructure/Ship)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 17.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:07:25.164121"
+  },
+  {
+    "stock_code": "306200",
+    "company_name": "세아제강",
+    "group_id": "Group-B (Infrastructure/Ship)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 17.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:07:59.863873"
+  },
+  {
+    "stock_code": "267260",
+    "company_name": "HD현대일렉트릭",
+    "group_id": "Group-C (Power/Grid)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 17.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:08:44.403162"
+  },
+  {
+    "stock_code": "010120",
+    "company_name": "LS일렉트릭",
+    "group_id": "Group-C (Power/Grid)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 15,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 15.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:09:28.173884"
+  },
+  {
+    "stock_code": "033100",
+    "company_name": "제룡전기",
+    "group_id": "Group-C (Power/Grid)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 12,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 12.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:10:10.588275"
+  },
+  {
+    "stock_code": "298040",
+    "company_name": "효성중공업",
+    "group_id": "Group-C (Power/Grid)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 12,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 12.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:10:49.632039"
+  },
+  {
+    "stock_code": "103590",
+    "company_name": "일진전기",
+    "group_id": "Group-C (Power/Grid)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 17,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 17.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:12:30.860189"
+  },
+  {
+    "stock_code": "001440",
+    "company_name": "대한전선",
+    "group_id": "Group-C (Power/Grid)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 20,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 20.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:13:11.778977"
+  },
+  {
+    "stock_code": "005930",
+    "company_name": "삼성전자",
+    "group_id": "Group-D (Strategic Reserve)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 15,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 15.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:13:51.065863"
+  },
+  {
+    "stock_code": "000270",
+    "company_name": "기아",
+    "group_id": "Group-D (Strategic Reserve)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 25,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 25.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:14:33.732512"
+  },
+  {
+    "stock_code": "005380",
+    "company_name": "현대차",
+    "group_id": "Group-D (Strategic Reserve)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "비중 축소",
+      "Gauge_Bar": 65,
+      "Max_Weight": "0%"
+    },
+    "entry_point_guide": "⚠️ 리스크 과열. 신규 진입 금지 및 차익 실현 권장.",
+    "reasoning": [
+      "통합 리스크 65.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:15:20.343856"
+  },
+  {
+    "stock_code": "035420",
+    "company_name": "NAVER",
+    "group_id": "Group-D (Strategic Reserve)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 25,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 25.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:16:01.312499"
+  },
+  {
+    "stock_code": "138040",
+    "company_name": "메리츠금융지주",
+    "group_id": "Group-D (Strategic Reserve)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 20,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 20.0",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:16:46.400020"
+  },
+  {
+    "stock_code": "105560",
+    "company_name": "KB금융",
+    "group_id": "Group-D (Strategic Reserve)",
+    "data_fingerprint": "AUTO",
+    "conclusion": {
+      "Action": "분할 매수",
+      "Gauge_Bar": 12,
+      "Max_Weight": "10%"
+    },
+    "entry_point_guide": "✋ [추격 금지] 과열권 진입. 기업 가치는 높으나 단기 조정(RSI 50 부근) 대기 요망.",
+    "reasoning": [
+      "통합 리스크 12.5",
+      "RSI 83.8 / RS 1.16"
+    ],
+    "ui_metrics": {
+      "pbr_opm": "0.85 / +3.2%",
+      "backlog": "120%",
+      "turnover": "4.1회",
+      "rsi": 83.8,
+      "rs_score": 1.16,
+      "smart_money": "외인/기관 집중 매집"
+    },
+    "produced_by": "gemini-3.1-pro-preview/gemini-3.1-pro-preview",
+    "timestamp": "2026-04-27T03:17:25.578388"
+  }
+]
