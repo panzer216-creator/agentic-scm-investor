@@ -24,28 +24,38 @@ class AgenticSCMEngine:
             raw_data["dart_list"] = DartApi().get_recent_reports(self.stock_code)
 
             parser_res = ParserAgent().parse(raw_data, self.sector).get("standard_data_pack", {})
-            bull, red = BullAgent("Bull").analyze(parser_res, self.sector), RedTeamAgent("Red").analyze(parser_res, self.sector)
+            bull = BullAgent("Bull").analyze(parser_res, self.sector)
+            red = RedTeamAgent("Red").analyze(parser_res, self.sector)
 
             p_info = raw_data["price_info"]
             metrics = {"rsi": p_info.get("rsi", 50), "rs_score": p_info.get("rs_score", 1.0)}
             
             final = OrchestratorAgent().decide(parser_res, bull, red, self.stock_code, metrics)
 
+            # [수정 완료] buy_target, sell_target, bottleneck_logic 으로 변수명 완벽 매칭
             output = {
-                'stock_code': self.stock_code, 'company_name': self.stock_name,
-                'group_id': group_id, 'data_fingerprint': current_report_id,
-                'conclusion': {'Action': final['Action'], 'Gauge_Bar': int(final['Gauge_Bar']), 'Max_Weight': final['Max_Weight']},
-                'entry_point_guide': final['entry_point_guide'],
-                'reasoning': final['reasoning'],
-                'ui_metrics': {
-                    "pbr_opm": f"{p_info['pbr']} / {p_info['opm_yoy']}",
-                    "backlog": p_info['backlog_ratio'],
-                    "turnover": p_info['inv_turnover'],
-                    "rsi": p_info['rsi'],
-                    "rs_score": p_info['rs_score'],
-                    "smart_money": p_info['smart_money']
+                'stock_code': self.stock_code, 
+                'company_name': self.stock_name,
+                'group_id': group_id, 
+                'data_fingerprint': current_report_id,
+                'conclusion': {
+                    'Action': final.get('Action', '관망'), 
+                    'Gauge_Bar': int(final.get('Gauge_Bar', 50)), 
+                    'Max_Weight': final.get('Max_Weight', '0%')
                 },
-                'produced_by': final['produced_by'], 'timestamp': datetime.now().isoformat()
+                'buy_target': final.get('buy_target', '지표 산출 중'),
+                'sell_target': final.get('sell_target', '지표 산출 중'),
+                'bottleneck_logic': final.get('bottleneck_logic', '공급망 병목 사유 데이터 로딩 중...'),
+                'ui_metrics': {
+                    "pbr_opm": f"{p_info.get('pbr', 'N/A')} / {p_info.get('opm_yoy', 'N/A')}",
+                    "backlog": p_info.get('backlog_ratio', 'N/A'),
+                    "turnover": p_info.get('inv_turnover', 'N/A'),
+                    "rsi": p_info.get('rsi', 50),
+                    "rs_score": p_info.get('rs_score', 1.0),
+                    "smart_money": p_info.get('smart_money', 'N/A')
+                },
+                'produced_by': final.get('produced_by', 'Unknown'), 
+                'timestamp': datetime.now().isoformat()
             }
             self._archive_result(output)
             self.telegram.send_report(self.stock_name, output)
