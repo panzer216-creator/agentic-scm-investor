@@ -3,122 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>산업 병목 추적 & 투자 매트릭스 v2.2</title>
+    <title>산업 병목 & 투자 매트릭스 v2.2</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 15px; }
+        :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #d35400; --red: #c62828; --green: #2e7d32; --portfolio: #8e44ad; }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         .container { max-width: 600px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .run-btn { background: #1976d2; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
-        .group-title { font-size: 1.2em; font-weight: bold; color: #d35400; margin: 30px 0 15px 0; border-left: 4px solid #d35400; padding-left: 10px; }
+        .group-title { font-size: 1.2em; font-weight: bold; color: var(--accent); margin: 25px 0 10px 0; border-left: 4px solid var(--accent); padding-left: 10px; }
+        .group-e { color: var(--portfolio); border-left-color: var(--portfolio); }
         
-        .card { background: #1e1e1e; border-radius: 16px; margin-bottom: 20px; border: 1px solid #333; overflow: hidden; }
-        .card-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a2a; }
-        .comp-name { font-size: 1.4em; font-weight: bold; color: #fff; }
-        .hot-tag { font-size: 0.6em; color: #e74c3c; margin-left: 8px; vertical-align: middle; }
-        .action-badge { padding: 6px 16px; border-radius: 20px; font-size: 0.9em; font-weight: bold; }
-        .badge-buy { background: #7f0000; color: #fff; } /* 강력매수 적색 */
-        .badge-wait { background: #444; color: #ccc; }
+        details { background: var(--card); border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; overflow: hidden; }
+        summary { padding: 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; font-weight: bold; }
+        .action-tag { padding: 5px 12px; border-radius: 20px; font-size: 0.8em; }
+        .tag-buy { background: #7f0000; color: #fff; }
+        .tag-wait { background: #444; color: #ccc; }
 
-        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 20px; }
-        .m-box { background: #262626; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333; }
-        .m-label { font-size: 0.7em; color: #888; margin-bottom: 5px; }
-        .m-value { font-size: 1.1em; font-weight: bold; color: #fff; }
+        .content { padding: 0 18px 18px; border-top: 1px solid #333; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .m-box { background: #262626; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .m-label { font-size: 0.6em; color: #888; margin-bottom: 4px; }
+        .m-value { font-size: 1em; font-weight: bold; }
 
-        /* 게이지 바 영역 */
-        .gauge-area { padding: 0 20px 20px; text-align: center; }
-        .gauge-label { font-size: 0.75em; color: #888; margin-bottom: 8px; }
-        .gauge-track { height: 6px; background: linear-gradient(to right, #2e7d32, #f57f17, #c62828); border-radius: 3px; position: relative; }
-        .gauge-marker { width: 4px; height: 16px; background: #fff; position: absolute; top: -5px; box-shadow: 0 0 4px #000; }
-
-        /* 타점 및 논리 박스 */
-        .target-area { padding: 0 20px 20px; }
-        .t-box { padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9em; display: flex; align-items: flex-start; }
-        .t-buy { background: rgba(46, 125, 50, 0.1); border: 1px solid #2e7d32; }
-        .t-sell { background: rgba(198, 40, 40, 0.1); border: 1px solid #c62828; }
-        .t-icon { margin-right: 10px; font-size: 1.2em; }
-        
-        .logic-box { background: #262626; padding: 15px; border-radius: 8px; font-size: 0.9em; line-height: 1.6; color: #ccc; border-left: 4px solid #1976d2; }
-        .logic-title { font-weight: bold; color: #fff; margin-bottom: 5px; }
+        .target-box { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.9em; display: flex; align-items: flex-start; }
+        .t-buy { background: rgba(46, 125, 50, 0.1); border: 1px solid var(--green); }
+        .t-sell { background: rgba(198, 40, 40, 0.1); border: 1px solid var(--red); }
+        .logic-box { background: #262626; padding: 15px; border-radius: 8px; font-size: 0.9em; border-left: 4px solid #1976d2; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="header">
+            <h2>🏗️ SCM 매트릭스</h2>
+            <button class="run-btn" onclick="triggerRun()">🚀 심층 분석 가동</button>
+        </div>
         <div id="dashboard"></div>
     </div>
-
     <script>
-        async function renderDashboard() {
-            try {
-                const data = await (await fetch('data/analysis_history.json?t=' + Date.now())).json();
-                const container = document.getElementById('dashboard');
-                
-                const groups = {};
-                data.forEach(item => { 
-                    if(!groups[item.group_id]) groups[item.group_id] = []; 
-                    groups[item.group_id].push(item); 
-                });
-
-                Object.keys(groups).sort().forEach(gId => {
-                    let html = `<div class="group-title">${gId}</div>`;
-                    
-                    groups[gId].forEach(item => {
-                        const m = item.ui_metrics || {};
-                        const conc = item.conclusion || {};
-                        const action = conc.Action || "관망";
-                        const badgeClass = action.includes('매수') ? 'badge-buy' : 'badge-wait';
-                        
-                        // 리스크 게이지 위치 계산 (0~100%)
-                        const gaugeVal = conc.Gauge_Bar || 50;
-                        
-                        html += `
-                        <div class="card">
-                            <div class="card-header">
-                                <div>
-                                    <span class="comp-name">${item.company_name}</span>
-                                    <span class="hot-tag">SCM 핵심</span>
-                                </div>
-                                <span class="action-badge ${badgeClass}">${action}</span>
-                            </div>
-
-                            <div class="metrics-grid">
-                                <div class="m-box"><div class="m-label">PBR / OPM YoY</div><div class="m-value">${m.pbr_opm || 'N/A'}</div></div>
-                                <div class="m-box"><div class="m-label">RSI(14)</div><div class="m-value">${m.rsi || '50'}</div></div>
-                                <div class="m-box"><div class="m-label">수주잔고비율</div><div class="m-value">${m.backlog || 'N/A'}</div></div>
-                                <div class="m-box"><div class="m-label">재고회전율</div><div class="m-value">${m.turnover || 'N/A'}</div></div>
-                                <div class="m-box"><div class="m-label">RS SCORE</div><div class="m-value">${m.rs_score || '1.0'}</div></div>
-                                <div class="m-box"><div class="m-label">SMART MONEY</div><div class="m-value" style="font-size:0.9em;">${m.smart_money || '분석중'}</div></div>
-                            </div>
-
-                            <div class="gauge-area">
-                                <div class="gauge-label">SCM 리스크 게이지 (${gaugeVal}%)</div>
-                                <div class="gauge-track">
-                                    <div class="gauge-marker" style="left: ${gaugeVal}%;"></div>
-                                </div>
-                            </div>
-
-                            <div class="target-area">
-                                <div class="t-box t-buy">
-                                    <div class="t-icon">🟢</div>
-                                    <div><strong>매수 타점:</strong> ${item.buy_target || '지표 산출 중'}</div>
-                                </div>
-                                <div class="t-box t-sell">
-                                    <div class="t-icon">🔴</div>
-                                    <div><strong>매도 타점:</strong> ${item.sell_target || '지표 산출 중'}</div>
-                                </div>
-                                
-                                <div class="logic-box">
-                                    <div class="logic-title">📝 왜 이 기업이 병목인가?</div>
-                                    ${item.bottleneck_logic || '공급망 병목 사유 데이터 로딩 중...'}
-                                </div>
-                            </div>
-                        </div>`;
-                    });
-                    container.innerHTML += html;
-                });
-            } catch (e) {
-                document.getElementById('dashboard').innerHTML = '<p style="color:red; text-align:center;">데이터를 불러오는 중 오류가 발생했습니다.</p>';
-            }
+        function triggerRun() {
+            const pat = localStorage.getItem('GH_PAT') || prompt("GitHub PAT를 입력하세요:");
+            if(!pat) return; localStorage.setItem('GH_PAT', pat);
+            fetch(`https://api.github.com/repos/YOUR_ID/YOUR_REPO/actions/workflows/main.yml/dispatches`, {
+                method: 'POST', headers: { 'Authorization': `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' },
+                body: JSON.stringify({ ref: 'main', inputs: { run_mode: 'MANUAL' } })
+            }).then(res => alert(res.ok ? "✅ 분석 시작 (5~10분 소요)" : "❌ 실패"));
         }
-        window.onload = renderDashboard;
+
+        async function render() {
+            const data = await (await fetch('data/analysis_history.json?t=' + Date.now())).json();
+            const container = document.getElementById('dashboard');
+            const groups = {};
+            data.forEach(item => { if(!groups[item.group_id]) groups[item.group_id] = []; groups[item.group_id].push(item); });
+
+            const sorted = Object.keys(groups).sort((a,b) => a.includes('Group-E') ? -1 : b.includes('Group-E') ? 1 : a.localeCompare(b));
+            sorted.forEach(gId => {
+                const isE = gId.includes('Group-E');
+                let html = `<div class="group-title ${isE?'group-e':''}">${isE?'💼 ':''}${gId}</div>`;
+                groups[gId].forEach(item => {
+                    const m = item.ui_metrics;
+                    html += `
+                        <details ${isE?'open':''}>
+                            <summary><span>${item.company_name} <small>[${item.stock_code}]</small></span>
+                            <span class="action-tag ${item.conclusion.Action.includes('매수')?'tag-buy':'tag-wait'}">${item.conclusion.Action}</span></summary>
+                            <div class="content">
+                                <div class="metrics-grid">
+                                    <div class="m-box"><div class="m-label">PBR / OPM YoY</div><div class="m-value">${m.pbr_opm}</div></div>
+                                    <div class="m-box"><div class="m-label">수주잔고비율</div><div class="m-value">${m.backlog}</div></div>
+                                    <div class="m-box"><div class="m-label">재고회전율</div><div class="m-value">${m.turnover}</div></div>
+                                    <div class="m-box"><div class="m-label">RSI(14)</div><div class="m-value">${m.rsi}</div></div>
+                                    <div class="m-box"><div class="m-label">RS SCORE</div><div class="m-value">${m.rs_score}</div></div>
+                                    <div class="m-box"><div class="m-label">SMART MONEY</div><div class="m-value" style="font-size:0.8em;">${m.smart_money}</div></div>
+                                </div>
+                                <div class="target-box t-buy">🟢 <b>매수:</b> ${item.buy_target}</div>
+                                <div class="target-box t-sell">🔴 <b>매도:</b> ${item.sell_target}</div>
+                                <div class="logic-box"><b>📝 병목 논리:</b><br>${item.bottleneck_logic}</div>
+                            </div>
+                        </details>`;
+                });
+                container.innerHTML += html;
+            });
+        }
+        window.onload = render;
     </script>
 </body>
 </html>
