@@ -12,7 +12,7 @@ from agents.orchestrator_agent import OrchestratorAgent
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 
 def is_holiday():
-    """주말(토,일) 체크 로직 (향후 공휴일 API 연동 가능)"""
+    """주말(토,일) 체크 로직"""
     return datetime.now().weekday() >= 5
 
 class AgenticSCMEngine:
@@ -23,6 +23,7 @@ class AgenticSCMEngine:
 
     def run_production_line(self, group_id, current_report_id):
         try:
+            # LLM 가동 (유료 공정)
             raw_data = {"price_info": KISApi().get_stock_data(self.stock_code)}
             raw_data["news_list"] = NaverNewsApi().search_stock_news(self.stock_name)
             raw_data["dart_list"] = DartApi().get_recent_reports(self.stock_code)
@@ -80,32 +81,31 @@ class AgenticSCMEngine:
 
 def should_run_analysis(stock_code, current_price_data, history_list):
     target_history = [h for h in history_list if h.get('stock_code') == stock_code]
-    if not target_history: return True, "신규 종목 진입", "INITIAL"
+    if not target_history: return True, "신규 종목", "INITIAL"
     
     last_record = target_history[-1]
     current_report_id = DartApi().get_latest_report_id(stock_code)
-    if current_report_id != last_record.get("data_fingerprint"): return True, "신규 공시 감지", current_report_id
+    if current_report_id != last_record.get("data_fingerprint"): return True, "공시 감지", current_report_id
 
     last_price = last_record.get("ui_metrics", {}).get("last_analyzed_price", 0)
     curr_price = current_price_data.get("current_price", 0) if isinstance(current_price_data, dict) else 0
-    rsi = current_price_data.get("rsi", 50) if isinstance(current_price_data, dict) else 50
+    rsi = current_price_data.get("rsi", 50)
 
-    if rsi <= 40: return True, f"RSI 침체 진입 ({rsi})", current_report_id
+    if rsi <= 40: return True, f"RSI 침체 ({rsi})", current_report_id
     if last_price > 0 and curr_price > 0:
-        if abs((curr_price - last_price) / last_price) * 100 >= 5.0: return True, "주가 5% 이상 급변", current_report_id
-    return False, "변동 사항 없음", current_report_id
+        if abs((curr_price - last_price) / last_price) * 100 >= 5.0: return True, "주가 급변", current_report_id
+    return False, "이상 없음", current_report_id
 
 if __name__ == "__main__":
-    run_mode = os.getenv("RUN_MODE", "AUTO") # GitHub Actions에서 AUTO 또는 MANUAL 전달
-    logging.info(f"🏭 Agentic SCM Engine 가동 (모드: {run_mode})")
+    run_mode = os.getenv("RUN_MODE", "AUTO")
+    logging.info(f"🏭 Agentic SCM Engine v2.2 (모드: {run_mode})")
 
+    # 휴일 자동 가동 차단
     if run_mode == "AUTO" and is_holiday():
-        logging.info("☕ 휴장일(주말/공휴일)입니다. 비용 절감을 위해 시스템 가동을 스킵합니다.")
+        logging.info("☕ 휴장일입니다. 자동 감시를 건너뜁니다.")
         sys.exit(0)
 
     plan = BucketFetcher().get_dynamic_production_plan()
-    if not plan: sys.exit(1)
-
     history = []
     if os.path.exists("data/analysis_history.json"):
         with open("data/analysis_history.json", "r", encoding="utf-8") as f:
@@ -122,12 +122,11 @@ if __name__ == "__main__":
                 
                 if run_flag:
                     if run_mode == "AUTO":
-                        # Track 1: LLM 호출 없이 무료 API로 감시 후 알람만 발송
-                        tg.send_plain_message(f"🚨 [센티널 포착] {s['name']}\n사유: {reason}\n대시보드에서 '심층 분석'을 가동하십시오.")
-                        logging.info(f"🔔 {s['name']} 알람 발송 완료 ({reason})")
+                        # Track 1: 무료 API 기반 알람 (비용 0원)
+                        tg.send_plain_message(f"🚨 [SCM 센티널] {s['name']}\n사유: {reason}\n대시보드에서 분석을 가동하세요.")
                     else:
-                        # Track 2: 대시보드 버튼 클릭 시에만 LLM 풀가동
+                        # Track 2: 수동 클릭 시 LLM 가동 (비용 발생)
                         AgenticSCMEngine(s["code"], s["name"], s["sector"]).run_production_line(g_id, report_id)
                         time.sleep(1)
             except Exception as e:
-                logging.exception(f"⚠️ {s['name']} 오류: {e}")
+                logging.exception(f"⚠️ {s['name']} 공정 오류: {e}")
