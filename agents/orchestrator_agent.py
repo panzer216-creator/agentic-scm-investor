@@ -35,7 +35,6 @@ class OrchestratorAgent:
             buy_target = "바닥 미확인. 신규 매수 절대 금지"
             sell_target = "반등 시 비중 축소 우선"
 
-        # 안전한 병목 논리 추출
         bull_reasoning = bull.get('reasoning', ['병목 사유 분석 중'])
         bull_logic = bull_reasoning[0] if isinstance(bull_reasoning, list) and len(bull_reasoning) > 0 else str(bull_reasoning)
 
